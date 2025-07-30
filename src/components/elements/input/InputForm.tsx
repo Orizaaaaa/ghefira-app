@@ -14,7 +14,7 @@ type Props = {
 function InputForm({
     htmlFor,
     errorMsg,
-    marginDiown = 'mb-2',
+    marginDiown = 'mb-0',
     title,
     type,
     onChange,
