@@ -7,16 +7,17 @@ import { RxDashboard } from "react-icons/rx";
 import { FaBook, FaBookBookmark } from "react-icons/fa6";
 import { logo, realLogo } from "@/app/image";
 import Image from "next/image";
-import { IoPricetags, IoReceiptOutline, IoStorefront } from "react-icons/io5";
+import { IoNewspaperOutline, IoPricetags, IoReceiptOutline, IoStorefront } from "react-icons/io5";
 import { FaMoneyBillTransfer, FaUserGear } from "react-icons/fa6";
 import ButtonSecondary from "@/components/elements/buttonSecondary";
 import { LuBookDown, LuBookPlus } from "react-icons/lu";
-import { MdDashboard, MdHistory, MdOutlineLibraryBooks } from "react-icons/md";
+import { MdDashboard, MdHistory, MdOutlineCategory, MdOutlineLibraryBooks } from "react-icons/md";
 import { RiBook2Line } from "react-icons/ri";
 import { TbMoneybag } from "react-icons/tb";
 import { HiOutlineArchiveBox } from "react-icons/hi2";
 import { SiGitbook } from "react-icons/si";
 import { BsPersonFillGear } from "react-icons/bs";
+import { FaMoneyCheckAlt } from "react-icons/fa";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -129,9 +130,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             <ul className="mb-6 flex flex-col gap-1.5">
               {/* <!-- Menu Item Dashboard --> */}
               <NavigationList icon={<MdDashboard size={24} />} title="Home" pathname="/admin/dashboard" />
-              <NavigationList icon={<BsPersonFillGear size={24} />} title="Riwayat Peminjaman" pathname="/admin/history" />
-              <NavigationList icon={<SiGitbook size={24} />} title="Kelola Buku" pathname="/admin/manage_book" />
-              <NavigationList icon={<TbMoneybag size={24} />} title="Denda" pathname="/admin/fines" />
+              <NavigationList icon={<FaMoneyBillTransfer size={24} />} title="Saldo" pathname="/admin/saldo" />
+              <NavigationList icon={<IoNewspaperOutline size={24} />} title="Transaksi" pathname="/admin/transaction" />
+              <NavigationList icon={<MdOutlineCategory size={24} />} title="Kategori" pathname="/admin/category" />
               <ButtonSecondary className="w-full py-1 rounded-md font-medium mt-20 cursor-pointer" onClick={handleLogout}>
                 Logout
               </ButtonSecondary>
