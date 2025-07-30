@@ -28,7 +28,7 @@ const page = (props: Props) => {
     return (
         <DefaultLayout>
             <div className=" flex justify-end mb-4">
-                <ButtonSecondary className='py-1 px-2 rounded-xl'> + Tambah Transaksi </ButtonSecondary>
+                <ButtonSecondary className='py-1 px-2 rounded-xl'> + Tambah Saldo </ButtonSecondary>
             </div>
             <div className="bg-primaryGreen rounded-xl p-4 text-white shadow-md w-full ">
                 <p className="text-sm text-gray-200">Credit Bank Debt</p>
