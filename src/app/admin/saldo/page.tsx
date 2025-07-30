@@ -88,7 +88,7 @@ const page = (props: Props) => {
                 <h2 className="text-3xl font-bold mb-2">$11,239.00</h2>
                 <ResponsiveContainer width="100%" height={60}>
                     <BarChart data={dataSideChart}>
-                        <Bar dataKey="value" fill="#ff5c5c" radius={[4, 4, 0, 0]} barSize={4} />
+                        <Bar dataKey="value" fill="#ff5c5c" radius={[4, 4, 0, 0]} barSize={25} />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
