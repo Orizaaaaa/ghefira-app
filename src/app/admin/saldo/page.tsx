@@ -62,10 +62,10 @@ const page = (props: Props) => {
                 <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={openModalDelete}> delete </ButtonSecondary>
             </div>
             <div className="bg-primaryGreen rounded-xl p-4 text-white shadow-md w-full ">
-                <p className="text-sm text-gray-200">Credit Bank Debt</p>
+                <p className="text-sm text-gray-200">Saldo Total</p>
                 <h2 className="text-3xl font-bold">${current.toLocaleString()}</h2>
                 <p className="text-sm text-gray-300">/ {total.toLocaleString()}</p>
-                <p className="mt-2 text-sm text-gray-200">{percentage}% completed</p>
+                <p className="mt-2 text-sm text-gray-200">{percentage}% </p>
                 <div className="mt-2 flex gap-[2px]">
                     {Array.from({ length: 100 }, (_, i) => (
                         <div
