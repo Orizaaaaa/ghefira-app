@@ -108,10 +108,10 @@ function Page() {
                 <div className="col-span-2 rounded-xl ">
 
                     <div className="bg-primaryGreen rounded-xl p-4 text-white shadow-md w-full ">
-                        <p className="text-sm text-gray-200">Credit Bank Debt</p>
+                        <p className="text-sm text-gray-200">Saldo Masuk</p>
                         <h2 className="text-3xl font-bold">${current.toLocaleString()}</h2>
                         <p className="text-sm text-gray-300">/ {total.toLocaleString()}</p>
-                        <p className="mt-2 text-sm text-gray-200">{percentage}% completed</p>
+                        <p className="mt-2 text-sm text-gray-200">{percentage}%</p>
                         <div className="mt-2 flex gap-[2px]">
                             {Array.from({ length: 100 }, (_, i) => (
                                 <div
@@ -125,7 +125,7 @@ function Page() {
 
                     <div className="bg-primaryGreen rounded-xl p-4 text-white shadow-md w-full mt-5" >
                         <div className="flex justify-between items-center mb-1">
-                            <p className="text-sm text-gray-400">Your assets</p>
+                            <p className="text-sm text-gray-400">Saldo Keluar</p>
                             <div className="text-xs text-red-400 flex items-center gap-1">
                                 <span className="w-2 h-2 bg-red-500 rounded-full" />
                                 -9%
