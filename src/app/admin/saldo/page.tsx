@@ -1,34 +1,64 @@
 'use client'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
+import InputForm from '@/components/elements/input/InputForm'
+import ModalDefault from '@/components/fragments/modal/modal'
+import ModalAlert from '@/components/fragments/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
+import { useDisclosure } from '@heroui/react'
+import { on } from 'events'
 import React from 'react'
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
 type Props = {}
 
 const page = (props: Props) => {
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const { isOpen: isOpenUpdate, onOpen: onOpenUpdate, onClose: onCloseUpdate } = useDisclosure();
+    const { isOpen: isOpenDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
     const total = 16234;
     const current = 8445.98;
     const percentage = Math.round((current / total) * 100);
+    const [form, setForm] = React.useState({
+        name: '',
+        amount: '',
+        description: ''
+    });
 
+    const [formUpdate, setFormUpdate] = React.useState({
+        name: '',
+        amount: '',
+        description: ''
+    });
 
     const dataSideChart = Array.from({ length: 30 }, () => ({
         value: Math.floor(Math.random() * 1000),
     }));
-    const data = [
-        { date: 'May 15', value: 100 },
-        { date: 'May 20', value: 80 },
-        { date: 'May 25', value: 130 },
-        { date: 'May 30', value: 90 },
-        { date: 'Jun 05', value: 120 },
-        { date: 'Jun 10', value: 110 },
-        { date: 'Jun 15', value: 160 },
-    ];
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleChangeUpdate = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormUpdate({ ...formUpdate, [e.target.name]: e.target.value });
+    };
+
+    const openModalUpdate = () => {
+        onOpenUpdate();
+    }
+    const openModalCreate = () => {
+        onOpen();
+    }
+
+    const openModalDelete = () => {
+        onOpenDelete();
+    }
     return (
         <DefaultLayout>
-            <div className=" flex justify-end mb-4">
-                <ButtonSecondary className='py-1 px-2 rounded-xl'> + Tambah Saldo </ButtonSecondary>
+            <div className=" flex justify-end mb-4 gap-3">
+                <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={openModalCreate}> + Tambah Saldo </ButtonSecondary>
+                <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={openModalUpdate}> + Edit </ButtonSecondary>
+                <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={openModalDelete}> delete </ButtonSecondary>
             </div>
             <div className="bg-primaryGreen rounded-xl p-4 text-white shadow-md w-full ">
                 <p className="text-sm text-gray-200">Credit Bank Debt</p>
@@ -62,6 +92,57 @@ const page = (props: Props) => {
                 </ResponsiveContainer>
             </div>
 
+            <ModalDefault isOpen={isOpen} onClose={onClose} >
+                <InputForm htmlFor="name" title="Name" type="text"
+                    className='bg-slate-300 rounded-md mt-3 '
+                    onChange={handleChange}
+                    value={form.name} />
+
+                <InputForm htmlFor="amount" title="Amount" type="number"
+                    className='bg-slate-300 rounded-md '
+                    onChange={handleChange}
+                    value={form.amount} />
+
+                <InputForm htmlFor="description" title="Amount" type="text"
+                    className='bg-slate-300 rounded-md '
+                    onChange={handleChange}
+                    value={form.description} />
+
+                <div className="flex justify-end gap-2">
+                    <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={onClose}>Batal</ButtonSecondary>
+                    <ButtonPrimary className='py-1 px-2 rounded-xl'>Simpan</ButtonPrimary>
+                </div>
+            </ModalDefault>
+
+            <ModalDefault isOpen={isOpenUpdate} onClose={onCloseUpdate} >
+                <InputForm htmlFor="name" title="Name" type="text"
+                    className='bg-slate-300 rounded-md mt-3 '
+                    onChange={handleChangeUpdate}
+                    value={formUpdate.name} />
+
+                <InputForm htmlFor="amount" title="Amount" type="number"
+                    className='bg-slate-300 rounded-md '
+                    onChange={handleChangeUpdate}
+                    value={form.amount} />
+
+                <InputForm htmlFor="description" title="Amount" type="text"
+                    className='bg-slate-300 rounded-md '
+                    onChange={handleChangeUpdate}
+                    value={formUpdate.description} />
+
+                <div className="flex justify-end gap-2">
+                    <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={onClose}>Batal</ButtonSecondary>
+                    <ButtonPrimary className='py-1 px-2 rounded-xl'>Simpan</ButtonPrimary>
+                </div>
+            </ModalDefault>
+
+            <ModalAlert isOpen={isOpenDelete} onClose={onCloseDelete}>
+                <h1>Apakah anda yakin ingin menghapus saldo ini?</h1>
+                <div className="flex justify-end gap-2">
+                    <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={onCloseDelete}>Batal</ButtonSecondary>
+                    <ButtonPrimary className='py-1 px-2 rounded-xl'>Hapus</ButtonPrimary>
+                </div>
+            </ModalAlert>
 
         </DefaultLayout>
     )
