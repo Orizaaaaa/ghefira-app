@@ -40,6 +40,7 @@ function Page() {
         { date: 'Jun 05', value: 120 },
         { date: 'Jun 10', value: 110 },
         { date: 'Jun 15', value: 160 },
+        { date: 'Juli 15', value: 100 },
     ];
 
     const total = 16234;
