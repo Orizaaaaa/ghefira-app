@@ -67,7 +67,7 @@ function Page() {
                             <div className="flex justify-center items-center">
                                 <div>
                                     <h1 className="font-bold text-xl text-white">Hai admin, selamat datang  👋</h1>
-                                    <p className="text-sm text-white">Mari mulai memanagement perpustakaan ini</p>
+                                    <p className="text-sm text-white">Mari mulai memanagement cash flow ini</p>
                                 </div>
                             </div>
 
