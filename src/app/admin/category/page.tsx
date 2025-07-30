@@ -8,7 +8,7 @@ const page = (props: Props) => {
     return (
         <DefaultLayout>
             <div className=" flex justify-end mb-4">
-                <ButtonSecondary className='py-1 px-2 rounded-xl'> + Tambah Saldo </ButtonSecondary>
+                <ButtonSecondary className='py-1 px-2 rounded-xl'> + Tambah Category </ButtonSecondary>
             </div>
         </DefaultLayout>
     )
