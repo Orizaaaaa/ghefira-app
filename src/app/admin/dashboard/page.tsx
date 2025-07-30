@@ -53,8 +53,8 @@ function Page() {
 
     return (
         <DefaultLayout>
-            <div className="grid grid-cols-6 gap-6">
-                <div className="col-span-4">
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+                <div className="md:col-span-4">
                     <div className="relative bg-primaryGreen w-full p-3 rounded-xl overflow-hidden">
                         {/* Decorative Circles */}
                         <div className="absolute -top-10 -left-10 w-32 h-32 bg-white/35 opacity-30 rounded-full z-0"></div>
@@ -79,32 +79,7 @@ function Page() {
                         </div>
                     </div>
 
-                    {/* Statistik */}
-                    {/* <div className="grid grid-cols-1 md:grid-cols-3 mt-5 gap-5">
-                        <div className="bg-primaryGreen rounded-xl p-2">
-                            <div className="flex gap-3 items-center">
-                                <IoPeople size={25} color="white" />
-                                <h1 className="text-white">Jumlah Peminjam saat ini</h1>
-                            </div>
-                            <h1 className="text-white text-xl font-bold mt-3">88</h1>
-                        </div>
 
-                        <div className="bg-primaryGreen rounded-xl p-2">
-                            <div className="flex gap-3 items-center">
-                                <ImBook size={20} color="white" />
-                                <h1 className="text-white">Jumlah Buku saat ini</h1>
-                            </div>
-                            <h1 className="text-white text-xl font-bold mt-3">8080</h1>
-                        </div>
-
-                        <div className="bg-primaryGreen rounded-xl p-2">
-                            <div className="flex gap-3 items-center">
-                                <FaMoneyBillTransfer size={22} color="white" />
-                                <h1 className="text-white">Total Semua Denda</h1>
-                            </div>
-                            <h1 className="text-white text-xl font-bold mt-3">9009</h1>
-                        </div>
-                    </div> */}
 
                     <div className="p-4 rounded-xl shadow-lg w-full h-[300px] mt-5">
                         <ResponsiveContainer width="100%" height="100%">
@@ -131,32 +106,24 @@ function Page() {
                 </div>
 
                 <div className="col-span-2 rounded-xl ">
-                    {/* <div className="bg-primaryGreen rounded-xl p-3 mb-6">
-                        <h1 className='font-medium text-gray-400 text-sm' >SALDO MASUK</h1>
-                        <h1 className='font-bold text-white' >Rp. 10.000.000</h1>
-                    </div>
-                    <div className="bg-primaryGreen rounded-xl p-3">
-                        <h1 className='font-medium text-gray-400 text-sm'>SALDO KELUAR</h1>
-                        <h1 className='font-bold text-white' >Rp. 10.000.000</h1>
-                    </div> */}
 
-                    <div className="bg-[#1c1c1c] rounded-xl p-4 text-white shadow-md w-full ">
-                        <p className="text-sm text-gray-400">Credit Bank Debt</p>
+                    <div className="bg-primaryGreen rounded-xl p-4 text-white shadow-md w-full ">
+                        <p className="text-sm text-gray-200">Credit Bank Debt</p>
                         <h2 className="text-3xl font-bold">${current.toLocaleString()}</h2>
-                        <p className="text-sm text-gray-500">/ {total.toLocaleString()}</p>
-                        <p className="mt-2 text-sm text-gray-400">{percentage}% completed</p>
+                        <p className="text-sm text-gray-300">/ {total.toLocaleString()}</p>
+                        <p className="mt-2 text-sm text-gray-200">{percentage}% completed</p>
                         <div className="mt-2 flex gap-[2px]">
                             {Array.from({ length: 100 }, (_, i) => (
                                 <div
                                     key={i}
-                                    className={`h-2 w-[2px] rounded-sm ${i < percentage ? 'bg-purple-500' : 'bg-gray-700'
+                                    className={`h-2 w-[2px] rounded-sm ${i < percentage ? 'bg-white' : 'bg-gray-700'
                                         }`}
                                 />
                             ))}
                         </div>
                     </div>
 
-                    <div className="bg-[#1c1c1c] rounded-xl p-4 text-white shadow-md w-full mt-5" >
+                    <div className="bg-primaryGreen rounded-xl p-4 text-white shadow-md w-full mt-5" >
                         <div className="flex justify-between items-center mb-1">
                             <p className="text-sm text-gray-400">Your assets</p>
                             <div className="text-xs text-red-400 flex items-center gap-1">
