@@ -11,6 +11,7 @@ import React, { useState } from 'react'
 type Props = {}
 
 const page = (props: Props) => {
+    const [id, setId] = useState('');
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isOpenUpdate, onOpen: onOpenUpdate, onClose: onCloseUpdate } = useDisclosure();
     const { isOpen: isOpenDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
