@@ -13,7 +13,7 @@ import ButtonSecondary from "@/components/elements/buttonSecondary";
 import { LuBookDown, LuBookPlus } from "react-icons/lu";
 import { MdDashboard, MdHistory, MdOutlineCategory, MdOutlineLibraryBooks } from "react-icons/md";
 import { RiBook2Line } from "react-icons/ri";
-import { TbMoneybag } from "react-icons/tb";
+import { TbBulb, TbMoneybag } from "react-icons/tb";
 import { HiOutlineArchiveBox } from "react-icons/hi2";
 import { SiGitbook } from "react-icons/si";
 import { BsPersonFillGear } from "react-icons/bs";
@@ -133,6 +133,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <NavigationList icon={<FaMoneyBillTransfer size={24} />} title="Saldo" pathname="/admin/saldo" />
               <NavigationList icon={<IoNewspaperOutline size={24} />} title="Transaksi" pathname="/admin/transaction" />
               <NavigationList icon={<MdOutlineCategory size={24} />} title="Kategori" pathname="/admin/category" />
+              <NavigationList icon={<TbBulb size={24} />} title="Latih Model" pathname="/admin/train_model" />
               <ButtonSecondary className="w-full py-1 rounded-md font-medium mt-20 cursor-pointer" onClick={handleLogout}>
                 Logout
               </ButtonSecondary>
