@@ -31,8 +31,8 @@ function InputForm({
                 </label>
             )}
             <input
-                className={`h-7 p-4 rounded-md outline-none w-full  ${errorMsg ? 'border-2 border-red' : ''
-                    } ${className}`}
+                className={`h-7 p-4 rounded-md outline-none w-full 
+                ${errorMsg ? 'border-2 border-red' : ''} ${className}`}
                 type={type}
                 name={htmlFor}
                 onChange={onChange}

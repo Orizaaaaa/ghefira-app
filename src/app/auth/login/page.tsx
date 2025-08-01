@@ -117,12 +117,12 @@ const Login = () => {
                         <Image src={realLogo} alt="logo" width={180} height={130} />
                     </div>
 
-                    <InputForm className='bg-slate-100' errorMsg={errorMsg.email} placeholder='Masukkan Email' type='email' htmlFor={'email'} value={form.email} onChange={handleChange} />
+                    <InputForm className='bg-slate-100 mb-4 py-5' errorMsg={errorMsg.email} placeholder='Masukkan Email' type='email' htmlFor={'email'} value={form.email} onChange={handleChange} />
                     <div className="relative">
-                        <button onClick={togglePassword} type='button' className={`icon-password h-full bg-transparent flex absolute right-0 justify-center items-center pe-4 ${errorMsg.password ? 'pb-7' : ''}`}>
+                        <button onClick={togglePassword} type='button' className={`icon-password h-full bg-transparent flex absolute right-0 justify-center items-center pb-2 pe-4 ${errorMsg.password ? 'pb-1' : ''}`}>
                             {showPassword ? <FaEyeSlash size={20} color='#636363' /> : <IoEye size={20} color='#636363' />}
                         </button>
-                        <InputForm errorMsg={errorMsg.password} className='form-input-login mb-2 bg-slate-100' htmlFor="password" onChange={handleChange} type={typePassword} value={form.password} placeholder="Masukkan Kata Sandi" />
+                        <InputForm errorMsg={errorMsg.password} className='form-input-login mb-2 bg-slate-100 py-5' htmlFor="password" onChange={handleChange} type={typePassword} value={form.password} placeholder="Masukkan Kata Sandi" />
                     </div>
                     <p className='text-red-800 my-3 text-sm'>{errorLogin}</p>
                     <ButtonPrimary typeButon={"submit"} className={`rounded-lg w-full mb-3 font-medium py-2 flex justify-center items-center`}>
