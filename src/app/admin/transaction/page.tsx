@@ -1,5 +1,5 @@
 'use client'
-import { createTransactionModel, deleteTransaction, getAllCategory, getAllSaldo, getAllTransaction } from '@/api/method'
+import { createTransactionModel, deleteTransaction, getAllCategory, getAllSaldo, getAllTransaction, updateTransaction } from '@/api/method'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import InputForm from '@/components/elements/input/InputForm'
@@ -202,6 +202,21 @@ const Page = (props: Props) => {
         }
     }
 
+
+    const handleEditTransaction = async () => {
+        const toastId = toast.loading('Mengubah transaksi...');
+        try {
+            await updateTransaction(id, formUpdate, (res: any) => {
+                console.log(res);
+                fetchData();
+                toast.success('Transaksi berhasil diubah!', { id: toastId });
+                onCloseUpdate();
+            });
+        } catch (error) {
+            console.error(error);
+            toast.error('Gagal mengubah transaksi.', { id: toastId });
+        }
+    }
     const total = 2000;
     const spent = 1000;
     const left = total - spent;
@@ -480,7 +495,7 @@ const Page = (props: Props) => {
                     <ButtonSecondary className="py-1 px-2 rounded-xl" onClick={onCloseUpdate}>
                         Batal
                     </ButtonSecondary>
-                    <ButtonPrimary className="py-1 px-2 rounded-xl">
+                    <ButtonPrimary className="py-1 px-2 rounded-xl" onClick={handleEditTransaction}>
                         Simpan
                     </ButtonPrimary>
                 </div>

@@ -82,6 +82,14 @@ export const deleteTransaction = async (id: any) => {
 }
 
 
+export const updateTransaction = async (id: any, form: any, callback: any) => {
+    await axiosInterceptor.put(`/transaction/${id}`, form)
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            console.log(err);
+        });
+}
 
 
 // CAPSTER

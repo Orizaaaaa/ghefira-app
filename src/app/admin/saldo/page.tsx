@@ -294,6 +294,7 @@ const page = (props: Props) => {
             </Table>
 
             <ModalDefault isOpen={isOpen} onClose={onClose} >
+                <h1 className='text-xl font-bold my-4'>Tambah Saldo</h1>
                 <InputForm htmlFor="name" title="Name" type="text"
                     className='bg-slate-300 rounded-md mt-3 '
                     onChange={handleChange}
@@ -316,6 +317,7 @@ const page = (props: Props) => {
             </ModalDefault>
 
             <ModalDefault isOpen={isOpenUpdate} onClose={onCloseUpdate} >
+                <h1 className='text-xl font-bold my-4'>Edit Saldo</h1>
                 <InputForm htmlFor="name" title="Name" type="text"
                     className='bg-slate-300 rounded-md mt-3 '
                     onChange={handleChangeUpdate}
