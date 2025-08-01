@@ -87,18 +87,21 @@ const page = (props: Props) => {
         fetchData();
     }, []);
 
-    const onSelectionChange = (_id: string) => {
-        setForm({
-            ...form,
-            saldo: _id
-        });
+    const handleSelectionChange = (key: string | null, field: 'saldo' | 'type') => {
+        if (!key) return;
+        setForm((prev) => ({
+            ...prev,
+            [field]: key
+        }));
     };
-    const onSelectionCategory = (type: string) => {
-        setForm({
-            ...form,
-            type: type
-        });
+    const handleSelectionChangeUpdate = (key: string | null, field: 'saldo' | 'type') => {
+        if (!key) return;
+        setFormUpdate((prev) => ({
+            ...prev,
+            [field]: key
+        }));
     };
+
     const total = 2000;
     const spent = 1000;
     const left = total - spent;
@@ -116,8 +119,6 @@ const page = (props: Props) => {
         <DefaultLayout>
             <div className=" flex justify-end mb-4 gap-3">
                 <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={handleOpenCreate}> + Tambah Transaksi </ButtonSecondary>
-                <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={handleOpenUpdate}> + Edit </ButtonSecondary>
-                <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={handleOpenDelete}> delete </ButtonSecondary>
             </div>
 
 
@@ -185,7 +186,7 @@ const page = (props: Props) => {
                         <Autocomplete
                             className="w-full"
                             variant='bordered'
-                            onSelectionChange={(e: any) => onSelectionChange(e)}
+                            onSelectionChange={(e: any) => handleSelectionChange(e, 'saldo')}
                             value={form.saldo}
                         >
                             {saldo.map((item: any) => (
@@ -198,7 +199,7 @@ const page = (props: Props) => {
                         <Autocomplete
                             className="w-full"
                             variant='bordered'
-                            onSelectionChange={(e: any) => onSelectionCategory(e)}
+                            onSelectionChange={(e: any) => handleSelectionChange(e, 'type')}
                             value={form.type}
                         >
                             {type.map((item: any) => (
@@ -240,61 +241,53 @@ const page = (props: Props) => {
 
 
             <ModalDefault isOpen={isOpenUpdate} onClose={onCloseUpdate}>
-                {/* User */}
-                <InputForm
-                    htmlFor="user"
-                    title="User ID"
-                    type="text"
-                    className="bg-slate-300 rounded-md mt-3"
-                    onChange={handleChangeUpdate}
-                    value={formUpdate.user}
-                />
-
-                {/* Saldo */}
-                <InputForm
-                    htmlFor="saldo"
-                    title="Saldo ID"
-                    type="text"
-
-                    className="bg-slate-300 rounded-md"
-                    onChange={handleChangeUpdate}
-                    value={formUpdate.saldo}
-                />
-
-                {/* Amount */}
-                <InputForm
-                    htmlFor="amount"
-                    title="Amount"
-                    type="number"
-                    className="bg-slate-300 rounded-md"
-                    onChange={handleChangeUpdate}
-                    value={formUpdate.amount}
-                />
+                <div className="flex gap-4">
+                    <div className="">
+                        <h1>Pilih Saldo</h1>
+                        <Autocomplete
+                            className="w-full"
+                            variant='bordered'
+                            onSelectionChange={(e: any) => handleSelectionChangeUpdate(e, 'saldo')}
+                            value={formUpdate.saldo}
+                        >
+                            {saldo.map((item: any) => (
+                                <AutocompleteItem textValue={item.name} key={item._id}>{item.name} <span className='text-sm text-green-700'>{formatRupiah(item.amount)}</span></AutocompleteItem>
+                            ))}
+                        </Autocomplete>
+                    </div>
+                    <div className="">
+                        <h1>Pilih Tipe</h1>
+                        <Autocomplete
+                            className="w-full"
+                            variant='bordered'
+                            onSelectionChange={(e: any) => handleSelectionChangeUpdate(e, 'type')}
+                            value={formUpdate.type}
+                        >
+                            {type.map((item: any) => (
+                                <AutocompleteItem textValue={item.label} key={item.key}>{item.label} </AutocompleteItem>
+                            ))}
+                        </Autocomplete>
+                    </div>
+                </div>
 
                 {/* Description */}
                 <InputForm
                     htmlFor="description"
                     title="Description"
                     type="text"
-                    className="bg-slate-300 rounded-md"
+                    className="bg-slate-100 rounded-md"
                     onChange={handleChangeUpdate}
                     value={formUpdate.description}
                 />
 
-                {/* Type */}
-                <div className="mt-3">
-                    <label htmlFor="type" className="text-sm font-medium text-gray-700">Type</label>
-                    <select
-                        id="type"
-                        name="type"
-                        className="w-full bg-slate-300 rounded-md p-2 mt-1"
-                        value={formUpdate.type}
-                    >
-                        <option value="">Pilih Tipe</option>
-                        <option value="income">Income</option>
-                        <option value="expense">Expense</option>
-                    </select>
-                </div>
+                <InputForm
+                    htmlFor="amount"
+                    title="Amount"
+                    type="number"
+                    className="bg-slate-100 rounded-md"
+                    onChange={handleChangeUpdate}
+                    value={formUpdate.amount}
+                />
 
                 {/* Tombol Aksi */}
                 <div className="flex justify-end gap-2 mt-4">
