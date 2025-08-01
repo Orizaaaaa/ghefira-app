@@ -7,6 +7,7 @@ import ModalAlert from '@/components/fragments/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
 import { useDisclosure } from '@heroui/react'
 import React, { useState } from 'react'
+import { PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts'
 
 type Props = {}
 
@@ -51,6 +52,27 @@ const page = (props: Props) => {
         onOpenDelete();
     }
 
+    const categoryData = [
+        { name: 'Makanan & Minuman', value: 45 },
+        { name: 'Transportasi', value: 20 },
+        { name: 'Belanja', value: 15 },
+        { name: 'Hiburan', value: 10 },
+        { name: 'Tagihan', value: 8 },
+        { name: 'Lainnya', value: 2 }
+    ];
+
+    const data = [
+        {
+            name: 'Spent',
+            value: 50, // persen dari 2000
+            fill: '#3B82F6', // warna biru
+        },
+    ];
+
+    const total = 2000;
+    const spent = 1000;
+    const left = total - spent;
+
     return (
         <DefaultLayout>
             <div className=" flex justify-end mb-4 gap-3">
@@ -58,6 +80,67 @@ const page = (props: Props) => {
                 <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={handleOpenUpdate}> + Edit </ButtonSecondary>
                 <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={handleOpenDelete}> delete </ButtonSecondary>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+                <div className="md:col-span-4">
+                    <p>hallo</p>
+                </div>
+                <div className="col-span-2 rounded-xl ">
+                    <div className=" mx-auto">
+                        <div className="flex justify-between items-center mb-2">
+                            <h2 className="font-semibold text-black">My Budget</h2>
+                            <button className="text-sm text-gray-500 hover:underline">View all →</button>
+                        </div>
+
+                        {/* Chart area */}
+                        <div className="relative bg-slate-200 rounded-xl flex flex-col items-center pt-6 pb-8">
+                            {/* Chart */}
+                            <RadialBarChart
+                                width={200}
+                                height={200}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius="70%"
+                                outerRadius="100%"
+                                startAngle={180}
+                                endAngle={0}
+                                data={data}
+                            >
+                                <PolarAngleAxis
+                                    type="number"
+                                    domain={[0, 100]}
+                                    angleAxisId={0}
+                                    tick={false}
+                                />
+                                <RadialBar
+                                    background
+                                    dataKey="value"
+                                    cornerRadius={10}
+                                />
+                            </RadialBarChart>
+
+                            {/* Center Total */}
+                            <div className="absolute top-[55%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+                                <p className="text-sm text-gray-500">Total to spend</p>
+                                <p className="text-2xl font-bold text-blue-600">${total.toLocaleString()}</p>
+                            </div>
+
+                            {/* Spent & Left */}
+                            <div className="mt-4 w-full flex justify-around text-sm">
+                                <div className="text-center">
+                                    <p className="text-gray-400">Spent</p>
+                                    <p className="text-red-500 font-semibold">{spent.toLocaleString()}</p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-gray-400">Left</p>
+                                    <p className="text-green-500 font-semibold">{left.toLocaleString()}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 
             <ModalDefault isOpen={isOpen} onClose={onClose}>
                 {/* User */}
