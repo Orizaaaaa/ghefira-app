@@ -1,5 +1,5 @@
 'use client'
-import { createSaldo, getAllSaldo, updateSaldo } from '@/api/method'
+import { createSaldo, deleteSaldo, getAllSaldo, updateSaldo } from '@/api/method'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import InputForm from '@/components/elements/input/InputForm'
@@ -172,6 +172,19 @@ const page = (props: Props) => {
         }
     };
 
+    const handleDeleteSaldo = async () => {
+        const loadingToast = toast.loading('Menghapus data saldo...');
+        try {
+            await deleteSaldo(id);
+            toast.success('Saldo berhasil dihapus', { id: loadingToast });
+            fetchData();
+            onCloseDelete();
+        } catch (error) {
+            console.error(error);
+            toast.error('Gagal menghapus saldo', { id: loadingToast });
+        }
+    }
+
 
     return (
         <DefaultLayout>
@@ -343,7 +356,7 @@ const page = (props: Props) => {
                 <h1>Apakah anda yakin ingin menghapus saldo ini?</h1>
                 <div className="flex justify-end gap-2">
                     <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={onCloseDelete}>Batal</ButtonSecondary>
-                    <ButtonPrimary className='py-1 px-2 rounded-xl'>Hapus</ButtonPrimary>
+                    <ButtonPrimary className='py-1 px-2 rounded-xl' onClick={handleDeleteSaldo}>Hapus</ButtonPrimary>
                 </div>
             </ModalAlert>
 

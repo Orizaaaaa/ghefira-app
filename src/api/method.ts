@@ -40,6 +40,15 @@ export const updateSaldo = async (id: any, form: any, callback: any) => {
         });
 }
 
+export const deleteSaldo = async (id: any) => {
+    try {
+        const result = await axiosInterceptor.delete(`/saldo/${id}`)
+        return result.data; // ✅ return data langsung
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+}
 
 
 // transaction

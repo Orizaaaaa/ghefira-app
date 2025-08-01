@@ -339,12 +339,10 @@ const CategoryPage = () => {
             >
                 <p className="mb-6">Apakah Anda yakin ingin menghapus kategori ini?</p>
                 <div className="flex justify-end gap-3">
-                    <ButtonSecondary onClick={onCloseDelete}>
-                        Batal
-                    </ButtonSecondary>
-                    <ButtonPrimary onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
-                        Hapus
-                    </ButtonPrimary>
+                    <div className="flex justify-end gap-2">
+                        <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={onCloseDelete}>Batal</ButtonSecondary>
+                        <ButtonPrimary className='py-1 px-2 rounded-xl' onClick={handleDelete}>Hapus</ButtonPrimary>
+                    </div>
                 </div>
             </ModalAlert>
         </DefaultLayout>
