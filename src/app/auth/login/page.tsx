@@ -97,7 +97,7 @@ const Login = () => {
 
                 // Redirect berdasarkan role
                 if (res) {
-                    router.push('/admin_dashboard');
+                    router.push('/admin/dashboard');
                 }
             } else {
                 setErrorLogin('*Email atau password salah');

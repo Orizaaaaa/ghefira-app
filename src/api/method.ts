@@ -12,9 +12,9 @@ export const loginService = async (form: any, callback: any) => {
 }
 
 // services/api.ts
-export const getAllReservation = async () => {
+export const getAllSaldo = async () => {
     try {
-        const res = await axiosInterceptor.get('/booking');
+        const res = await axiosInterceptor.get('/saldo/list');
         return res.data; // ✅ return data
     } catch (err) {
         console.error(err);
