@@ -6,7 +6,7 @@ import InputForm from '@/components/elements/input/InputForm'
 import ModalDefault from '@/components/fragments/modal/modal'
 import ModalAlert from '@/components/fragments/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
-import { formatDate, formatRupiah } from '@/utils/helper'
+import { formatDate, formatDateWithDays, formatRupiah } from '@/utils/helper'
 import { Autocomplete, AutocompleteItem, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@heroui/react'
 import React, { useEffect, useState, useMemo } from 'react'
 import { IoMdTrash } from 'react-icons/io'
@@ -293,7 +293,7 @@ const Page = (props: Props) => {
                                     {item.type === 'income' ? 'Pendapatan' : 'Pengeluaran'}
                                 </span>
                             </TableCell>
-                            <TableCell>{formatDate(item.createdAt)}</TableCell>
+                            <TableCell>{formatDateWithDays(item.createdAt)}</TableCell>
                             <TableCell>
                                 <div className="flex gap-2">
                                     <button
@@ -390,6 +390,7 @@ const Page = (props: Props) => {
             </ModalDefault>
 
             <ModalDefault isOpen={isOpenUpdate} onClose={onCloseUpdate}>
+                <h1 className='text-xl font-bold my-4'>Edit Transaksi</h1>
                 <div className="flex gap-4">
                     <div className="">
                         <h1>Pilih Saldo</h1>
@@ -425,7 +426,7 @@ const Page = (props: Props) => {
                     htmlFor="description"
                     title="Description"
                     type="text"
-                    className="bg-slate-100 rounded-md"
+                    className="bg-slate-100 rounded-md py-5"
                     onChange={handleChangeUpdate}
                     value={formUpdate.description}
                 />
@@ -434,7 +435,7 @@ const Page = (props: Props) => {
                     htmlFor="amount"
                     title="Amount"
                     type="number"
-                    className="bg-slate-100 rounded-md"
+                    className="bg-slate-100 rounded-md py-5"
                     onChange={handleChangeUpdate}
                     value={formUpdate.amount}
                 />

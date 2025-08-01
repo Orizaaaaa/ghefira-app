@@ -172,26 +172,22 @@ export const columns = [
 ];
 
 
-export function formatDateFirebase(value: Timestamp | Date | null | undefined): string {
-    if (!value) return '-';
+export const formatDateWithDays = (dateString: string): string => {
+    const date = new Date(dateString);
 
-    let date: Date;
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const months = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
 
-    if (value instanceof Timestamp) {
-        date = value.toDate();
-    } else if (value instanceof Date) {
-        date = value;
-    } else {
-        return '-';
-    }
+    const dayName = days[date.getDay()];
+    const dateNum = date.getDate();
+    const monthName = months[date.getMonth()];
+    const year = date.getFullYear();
 
-    return date.toLocaleDateString('id-ID', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-    });
-}
-
+    return `${dayName}, ${dateNum} ${monthName} ${year}`;
+};
 
 
 export const uploadImage = (file: File) => {
