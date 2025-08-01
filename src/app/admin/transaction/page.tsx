@@ -1,4 +1,5 @@
 'use client'
+import { getAllTransaction } from '@/api/method'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import InputForm from '@/components/elements/input/InputForm'
@@ -6,13 +7,15 @@ import ModalDefault from '@/components/fragments/modal/modal'
 import ModalAlert from '@/components/fragments/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
 import { useDisclosure } from '@heroui/react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts'
 
 type Props = {}
 
 const page = (props: Props) => {
     const [id, setId] = useState('');
+    const [transaction, setTransaction] = useState([]);
+    const [loading, setLoading] = useState(false);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isOpenUpdate, onOpen: onOpenUpdate, onClose: onCloseUpdate } = useDisclosure();
     const { isOpen: isOpenDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
@@ -69,6 +72,21 @@ const page = (props: Props) => {
         },
     ];
 
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const result = await getAllTransaction();
+            setTransaction(result);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        fetchData();
+    }, []);
     const total = 2000;
     const spent = 1000;
     const left = total - spent;
@@ -81,61 +99,55 @@ const page = (props: Props) => {
                 <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={handleOpenDelete}> delete </ButtonSecondary>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-                <div className="md:col-span-4">
-                    <p>hallo</p>
+
+            <div className="mx-auto">
+                <div className="flex justify-between items-center mb-2">
+                    <h2 className="font-semibold text-black">My Budget</h2>
+                    <button className="text-sm text-gray-500 hover:underline">View all →</button>
                 </div>
-                <div className="col-span-2 rounded-xl ">
-                    <div className=" mx-auto">
-                        <div className="flex justify-between items-center mb-2">
-                            <h2 className="font-semibold text-black">My Budget</h2>
-                            <button className="text-sm text-gray-500 hover:underline">View all →</button>
+
+                {/* Chart area */}
+                <div className="relative bg-slate-200 rounded-xl flex flex-col items-center pt-6 pb-8">
+                    {/* Chart */}
+                    <RadialBarChart
+                        width={400}
+                        height={200}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius="70%"
+                        outerRadius="100%"
+                        startAngle={180}
+                        endAngle={0}
+                        data={data}
+                    >
+                        <PolarAngleAxis
+                            type="number"
+                            domain={[0, 100]}
+                            angleAxisId={0}
+                            tick={false}
+                        />
+                        <RadialBar
+                            background
+                            dataKey="value"
+                            cornerRadius={10}
+                        />
+                    </RadialBarChart>
+
+                    {/* Center Total */}
+                    <div className="absolute top-[55%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+                        <p className="text-sm text-gray-500">Total to spend</p>
+                        <p className="text-2xl font-bold text-blue-600">${total.toLocaleString()}</p>
+                    </div>
+
+                    {/* Spent & Left */}
+                    <div className="mt-4 w-full flex justify-around text-sm">
+                        <div className="text-center">
+                            <p className="text-gray-400">Spent</p>
+                            <p className="text-red-500 font-semibold">{spent.toLocaleString()}</p>
                         </div>
-
-                        {/* Chart area */}
-                        <div className="relative bg-slate-200 rounded-xl flex flex-col items-center pt-6 pb-8">
-                            {/* Chart */}
-                            <RadialBarChart
-                                width={200}
-                                height={200}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius="70%"
-                                outerRadius="100%"
-                                startAngle={180}
-                                endAngle={0}
-                                data={data}
-                            >
-                                <PolarAngleAxis
-                                    type="number"
-                                    domain={[0, 100]}
-                                    angleAxisId={0}
-                                    tick={false}
-                                />
-                                <RadialBar
-                                    background
-                                    dataKey="value"
-                                    cornerRadius={10}
-                                />
-                            </RadialBarChart>
-
-                            {/* Center Total */}
-                            <div className="absolute top-[55%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-                                <p className="text-sm text-gray-500">Total to spend</p>
-                                <p className="text-2xl font-bold text-blue-600">${total.toLocaleString()}</p>
-                            </div>
-
-                            {/* Spent & Left */}
-                            <div className="mt-4 w-full flex justify-around text-sm">
-                                <div className="text-center">
-                                    <p className="text-gray-400">Spent</p>
-                                    <p className="text-red-500 font-semibold">{spent.toLocaleString()}</p>
-                                </div>
-                                <div className="text-center">
-                                    <p className="text-gray-400">Left</p>
-                                    <p className="text-green-500 font-semibold">{left.toLocaleString()}</p>
-                                </div>
-                            </div>
+                        <div className="text-center">
+                            <p className="text-gray-400">Left</p>
+                            <p className="text-green-500 font-semibold">{left.toLocaleString()}</p>
                         </div>
                     </div>
                 </div>
@@ -143,35 +155,29 @@ const page = (props: Props) => {
 
 
             <ModalDefault isOpen={isOpen} onClose={onClose}>
-                {/* User */}
-                <InputForm
-                    htmlFor="user"
-                    title="User ID"
-                    type="text"
-                    className="bg-slate-300 rounded-md mt-3"
-                    onChange={handleChange}
-                    value={form.user}
-                />
-
                 {/* Saldo */}
-                <InputForm
-                    htmlFor="saldo"
-                    title="Saldo ID"
-                    type="text"
-                    className="bg-slate-300 rounded-md"
-                    onChange={handleChange}
-                    value={form.saldo}
-                />
 
-                {/* Amount */}
-                <InputForm
-                    htmlFor="amount"
-                    title="Amount"
-                    type="number"
-                    className="bg-slate-300 rounded-md"
-                    onChange={handleChange}
-                    value={form.amount}
-                />
+                <div className="flex gap-4">
+                    <InputForm
+                        htmlFor="saldo"
+                        title="Saldo"
+                        type="text"
+                        className="bg-slate-300 rounded-md"
+                        onChange={handleChange}
+                        value={form.saldo}
+                    />
+
+                    {/* Amount */}
+                    <InputForm
+                        htmlFor="amount"
+                        title="Amount"
+                        type="number"
+                        className="bg-slate-300 rounded-md"
+                        onChange={handleChange}
+                        value={form.amount}
+                    />
+                </div>
+
 
                 {/* Description */}
                 <InputForm
