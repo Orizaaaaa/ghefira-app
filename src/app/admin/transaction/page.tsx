@@ -138,12 +138,10 @@ const Page = (props: Props) => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const resultCategory = await getAllCategory();
             const resultSaldo = await getAllSaldo();
             const result = await getAllTransaction();
             setSaldo(resultSaldo.data);
             setTransaction(result);
-            setCategory(resultCategory.data);
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {

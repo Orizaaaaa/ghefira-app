@@ -22,6 +22,24 @@ export const getAllSaldo = async () => {
     }
 };
 
+export const createSaldo = async (form: any, callback: any) => {
+    await axiosInterceptor.post('/saldo', form)
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            console.log(err);
+        });
+}
+
+export const updateSaldo = async (id: any, form: any, callback: any) => {
+    await axiosInterceptor.put(`/saldo/${id}`, form)
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            console.log(err);
+        });
+}
+
 export const getAllCategory = async () => {
     try {
         const res = await axiosInterceptor.get('/category/list');

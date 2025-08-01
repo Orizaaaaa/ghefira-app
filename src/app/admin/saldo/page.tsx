@@ -1,5 +1,5 @@
 'use client'
-import { getAllSaldo } from '@/api/method'
+import { createSaldo, getAllSaldo, updateSaldo } from '@/api/method'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import InputForm from '@/components/elements/input/InputForm'
@@ -9,6 +9,7 @@ import DefaultLayout from '@/components/layouts/DefaultLayout'
 import { getKeyValue, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@heroui/react'
 import { s } from 'framer-motion/client'
 import React, { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 import { FaPenSquare } from 'react-icons/fa'
 import { IoMdTrash } from 'react-icons/io'
 import { MdCheckBoxOutlineBlank } from 'react-icons/md'
@@ -126,19 +127,50 @@ const page = (props: Props) => {
             year: 'numeric'
         });
     };
-
-
-    const openModalUpdate = () => {
-        onOpenUpdate();
-    }
     const openModalCreate = () => {
         onOpen();
     }
 
-    const openModalDelete = () => {
-        onOpenDelete();
-    }
-    console.log(apiResponse);
+    const handleCreateSaldo = async () => {
+        const loadingToast = toast.loading('Menyimpan data saldo...');
+
+        try {
+            await createSaldo(form, (res: any) => {
+                toast.success('Saldo berhasil ditambahkan', { id: loadingToast });
+
+                fetchData();
+                onClose();
+                setForm({
+                    name: '',
+                    amount: '',
+                    description: ''
+                });
+            });
+        } catch (error) {
+            console.error(error);
+            toast.error('Gagal menambahkan saldo', { id: loadingToast });
+        }
+    };
+
+    const handleEditSaldo = async () => {
+        const loadingToast = toast.loading('Mengubah data saldo...');
+        try {
+            await updateSaldo(id, formUpdate, (res: any) => {
+                toast.success('Saldo berhasil diubah', { id: loadingToast });
+
+                fetchData();
+                onCloseUpdate();
+                setFormUpdate({
+                    name: '',
+                    amount: 0,
+                    description: ''
+                });
+            });
+        } catch (error) {
+            console.error(error);
+            toast.error('Gagal mengubah saldo', { id: loadingToast });
+        }
+    };
 
 
     return (
@@ -267,19 +299,19 @@ const page = (props: Props) => {
                     onChange={handleChange}
                     value={form.name} />
 
-                <InputForm htmlFor="amount" title="Amount" type="number"
+                <InputForm htmlFor="amount" title="Jumlah" type="number"
                     className='bg-slate-300 rounded-md '
                     onChange={handleChange}
                     value={form.amount} />
 
-                <InputForm htmlFor="description" title="Amount" type="text"
+                <InputForm htmlFor="description" title="Deskripsi" type="text"
                     className='bg-slate-300 rounded-md '
                     onChange={handleChange}
                     value={form.description} />
 
                 <div className="flex justify-end gap-2">
                     <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={onClose}>Batal</ButtonSecondary>
-                    <ButtonPrimary className='py-1 px-2 rounded-xl'>Simpan</ButtonPrimary>
+                    <ButtonPrimary className='py-1 px-2 rounded-xl' onClick={handleCreateSaldo}>Simpan</ButtonPrimary>
                 </div>
             </ModalDefault>
 
@@ -301,7 +333,7 @@ const page = (props: Props) => {
 
                 <div className="flex justify-end gap-2">
                     <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={onClose}>Batal</ButtonSecondary>
-                    <ButtonPrimary className='py-1 px-2 rounded-xl'>Simpan</ButtonPrimary>
+                    <ButtonPrimary className='py-1 px-2 rounded-xl' onClick={handleEditSaldo}>Simpan</ButtonPrimary>
                 </div>
             </ModalDefault>
 
