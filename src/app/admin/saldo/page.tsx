@@ -67,7 +67,7 @@ const page = (props: Props) => {
 
     const [formUpdate, setFormUpdate] = useState({
         name: '',
-        amount: '',
+        amount: 0,
         description: ''
     });
 
@@ -138,6 +138,8 @@ const page = (props: Props) => {
     const openModalDelete = () => {
         onOpenDelete();
     }
+    console.log(apiResponse);
+
 
     return (
         <DefaultLayout>
@@ -164,7 +166,7 @@ const page = (props: Props) => {
                 {/* Saldo Keluar Card */}
                 <div className="bg-primaryGreen rounded-xl p-4 text-white shadow-md h-full flex flex-col">
                     <div className="flex justify-between items-center mb-1">
-                        <p className="text-sm text-gray-400">Saldo Keluar</p>
+                        <p className="text-sm text-gray-200">Saldo Keluar</p>
                         <div className="text-xs text-red-400 flex items-center gap-1">
                             <span className="w-2 h-2 bg-red-500 rounded-full" />
                             -9%
@@ -202,7 +204,7 @@ const page = (props: Props) => {
                     )
                 }
                 classNames={{
-                    wrapper: "min-h-[350px]",
+                    wrapper: "min-h-[250px]",
                     th: 'bg-secondaryGreen text-white font-semibold',
                     td: 'text-black',
                 }}
@@ -234,7 +236,7 @@ const page = (props: Props) => {
                                             setId(item._id);
                                             setFormUpdate({
                                                 name: item.name,
-                                                amount: item.amount.toString(),
+                                                amount: item.amount,
                                                 description: item.description
                                             });
                                             onOpenUpdate();
@@ -287,12 +289,12 @@ const page = (props: Props) => {
                     onChange={handleChangeUpdate}
                     value={formUpdate.name} />
 
-                <InputForm htmlFor="amount" title="Amount" type="number"
+                <InputForm htmlFor="amount" title="Jumlah" type="number"
                     className='bg-slate-300 rounded-md '
                     onChange={handleChangeUpdate}
-                    value={form.amount} />
+                    value={formUpdate.amount} />
 
-                <InputForm htmlFor="description" title="Amount" type="text"
+                <InputForm htmlFor="description" title="Deskripsi" type="text"
                     className='bg-slate-300 rounded-md '
                     onChange={handleChangeUpdate}
                     value={formUpdate.description} />
