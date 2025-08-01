@@ -1,13 +1,14 @@
 'use client'
-import { getAllCategory } from '@/api/method'
+import { deleteCategory, getAllCategory, updateCategory } from '@/api/method'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import InputForm from '@/components/elements/input/InputForm'
 import ModalDefault from '@/components/fragments/modal/modal'
 import ModalAlert from '@/components/fragments/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
-import { Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@heroui/react'
+import { Autocomplete, AutocompleteItem, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@heroui/react'
 import React, { useEffect, useState, useMemo } from 'react'
+import toast from 'react-hot-toast'
 
 type Category = {
     _id: string;
@@ -66,20 +67,12 @@ const CategoryPage = () => {
         fetchData();
     }, []);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { id, value } = e.target;
-        setForm(prev => ({
-            ...prev,
-            [id]: value,
-        }));
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    const handleChangeUpdate = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { id, value } = e.target;
-        setFormUpdate(prev => ({
-            ...prev,
-            [id]: value,
-        }));
+    const handleChangeUpdate = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormUpdate({ ...formUpdate, [e.target.name]: e.target.value });
     };
 
     const handleOpenCreate = () => {
@@ -113,6 +106,57 @@ const CategoryPage = () => {
             year: 'numeric'
         });
     };
+
+    const type = [
+        { label: "Pendapatan", key: "income" },
+        { label: "Pengeluaran", key: "expense" },
+    ];
+
+    const handleSelectionChange = (key: string | null, field: 'saldo' | 'type') => {
+        if (!key) return;
+        setForm((prev) => ({
+            ...prev,
+            [field]: key
+        }));
+    };
+
+    const handleSelectionChangeUpdate = (key: string | null, field: 'saldo' | 'type') => {
+        if (!key) return;
+        setFormUpdate((prev) => ({
+            ...prev,
+            [field]: key
+        }));
+    };
+
+
+    const handleUpdate = async () => {
+        const toastId = toast.loading('Memperbarui kategori...');
+        try {
+            await updateCategory(id, formUpdate, (result: any) => {
+                toast.success('Kategori berhasil diperbarui!', { id: toastId });
+                fetchData();
+                onCloseUpdate();
+            });
+        } catch (error) {
+            console.error(error);
+            toast.error('Gagal memperbarui kategori', { id: toastId });
+        }
+    };
+
+    const handleDelete = async () => {
+        const toastId = toast.loading('Menghapus kategori...');
+        try {
+            await deleteCategory(id, (result: any) => {
+                toast.success('Kategori berhasil dihapus!', { id: toastId });
+                fetchData();
+                onCloseDelete();
+            });
+        } catch (error) {
+            console.error(error);
+            toast.error('Gagal menghapus kategori', { id: toastId });
+        }
+    };
+
 
     return (
         <DefaultLayout>
@@ -201,7 +245,7 @@ const CategoryPage = () => {
                         htmlFor="name"
                         title="Nama Kategori"
                         type="text"
-
+                        className="bg-slate-100 rounded-md"
                         onChange={handleChange}
                         value={form.name}
                     />
@@ -210,33 +254,31 @@ const CategoryPage = () => {
                         htmlFor="description"
                         title="Deskripsi"
                         type="text"
-
+                        className="bg-slate-100 rounded-md"
                         onChange={handleChange}
                         value={form.description}
                     />
 
-                    <div>
-                        <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
-                            Tipe Kategori
-                        </label>
-                        <select
-                            id="type"
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                            onChange={handleChange}
+                    <div className="">
+                        <h1>Pilih Tipe</h1>
+                        <Autocomplete
+                            className="w-full"
+                            variant='bordered'
+                            onSelectionChange={(e: any) => handleSelectionChange(e, 'type')}
                             value={form.type}
                         >
-                            <option value="">Pilih Tipe</option>
-                            <option value="income">Pemasukan</option>
-                            <option value="expense">Pengeluaran</option>
-                        </select>
+                            {type.map((item) => (
+                                <AutocompleteItem textValue={item.label} key={item.key}>{item.label}</AutocompleteItem>
+                            ))}
+                        </Autocomplete>
                     </div>
                 </div>
 
                 <div className="flex justify-end gap-3 mt-6">
-                    <ButtonSecondary onClick={onClose}>
+                    <ButtonSecondary className="py-1 px-2 rounded-xl" onClick={onClose}>
                         Batal
                     </ButtonSecondary>
-                    <ButtonPrimary>
+                    <ButtonPrimary className="py-1 px-2 rounded-xl" >
                         Simpan
                     </ButtonPrimary>
                 </div>
@@ -244,12 +286,13 @@ const CategoryPage = () => {
 
             {/* Edit Category Modal */}
             <ModalDefault isOpen={isOpenUpdate} onClose={onCloseUpdate} >
+                <h1>Edit Kategori</h1>
                 <div className="space-y-4">
                     <InputForm
                         htmlFor="name"
                         title="Nama Kategori"
                         type="text"
-
+                        className="bg-slate-100 rounded-md mb-3 py-4"
                         onChange={handleChangeUpdate}
                         value={formUpdate.name}
                     />
@@ -258,33 +301,33 @@ const CategoryPage = () => {
                         htmlFor="description"
                         title="Deskripsi"
                         type="text"
-
+                        className="bg-slate-100 rounded-md mb-3 py-4"
                         onChange={handleChangeUpdate}
                         value={formUpdate.description}
                     />
 
-                    <div>
-                        <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
-                            Tipe Kategori
-                        </label>
-                        <select
-                            id="type"
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                            onChange={handleChangeUpdate}
+                    <div className="">
+                        <h1>Pilih Tipe</h1>
+                        <Autocomplete
+                            className="w-full"
+                            variant='bordered'
+                            onSelectionChange={(e: any) => handleSelectionChangeUpdate(e, 'type')}
                             value={formUpdate.type}
+                            selectedKey={formUpdate.type}
                         >
-                            <option value="income">Pemasukan</option>
-                            <option value="expense">Pengeluaran</option>
-                        </select>
+                            {type.map((item) => (
+                                <AutocompleteItem textValue={item.label} key={item.key}>{item.label}</AutocompleteItem>
+                            ))}
+                        </Autocomplete>
                     </div>
                 </div>
 
                 <div className="flex justify-end gap-3 mt-6">
-                    <ButtonSecondary onClick={onCloseUpdate}>
+                    <ButtonSecondary className="py-1 px-2 rounded-xl" onClick={onCloseUpdate}>
                         Batal
                     </ButtonSecondary>
-                    <ButtonPrimary>
-                        Simpan Perubahan
+                    <ButtonPrimary className="py-1 px-2 rounded-xl" onClick={handleUpdate}>
+                        Simpan
                     </ButtonPrimary>
                 </div>
             </ModalDefault>
@@ -299,7 +342,7 @@ const CategoryPage = () => {
                     <ButtonSecondary onClick={onCloseDelete}>
                         Batal
                     </ButtonSecondary>
-                    <ButtonPrimary className="bg-red-600 hover:bg-red-700">
+                    <ButtonPrimary onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
                         Hapus
                     </ButtonPrimary>
                 </div>

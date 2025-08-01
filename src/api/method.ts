@@ -154,8 +154,17 @@ export const getAllCategory = async () => {
     }
 };
 
-export const deleteCategory = (id: any, callback: any) => {
-    axiosInterceptor.delete(`/category/${id}`)
+export const deleteCategory = async (id: any, callback: any) => {
+    await axiosInterceptor.delete(`/category/${id}`)
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            console.log(err);
+        });
+}
+
+export const updateCategory = async (id: any, form: any, callback: any) => {
+    await axiosInterceptor.put(`/category/${id}`, form)
         .then((result) => {
             callback(result.data)
         }).catch((err) => {
