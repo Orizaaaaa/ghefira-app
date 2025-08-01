@@ -1,5 +1,5 @@
 'use client'
-import { getAllCategory, getAllSaldo, getAllTransaction } from '@/api/method'
+import { createTransactionModel, deleteTransaction, getAllCategory, getAllSaldo, getAllTransaction } from '@/api/method'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import InputForm from '@/components/elements/input/InputForm'
@@ -9,6 +9,7 @@ import DefaultLayout from '@/components/layouts/DefaultLayout'
 import { formatDate, formatDateWithDays, formatRupiah } from '@/utils/helper'
 import { Autocomplete, AutocompleteItem, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@heroui/react'
 import React, { useEffect, useState, useMemo } from 'react'
+import toast from 'react-hot-toast'
 import { IoMdTrash } from 'react-icons/io'
 import { RiEdit2Fill } from 'react-icons/ri'
 import { PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts'
@@ -79,7 +80,7 @@ const Page = (props: Props) => {
     const [rowsPerPage, setRowsPerPage] = useState(5);
 
     const [form, setForm] = useState({
-        user: '',
+        user: localStorage.getItem('id') || '',
         saldo: '',
         amount: '',
         description: '',
@@ -175,10 +176,39 @@ const Page = (props: Props) => {
         { label: "Pengeluaran", key: "expense" },
     ];
 
+    const handleCreateTransaction = async () => {
+        const toastId = toast.loading('Menyimpan transaksi...');
+        try {
+            await createTransactionModel(form, (res: any) => {
+                console.log(res);
+                fetchData();
+                onClose();
+                toast.success('Transaksi berhasil dibuat!', { id: toastId });
+            });
+        } catch (error) {
+            console.error(error);
+            toast.error('Gagal membuat transaksi.', { id: toastId });
+        }
+    };
+
+    const handleDelete = async () => {
+        const toastId = toast.loading('Menghapus transaksi...');
+        try {
+            await deleteTransaction(id);
+            fetchData();
+            onCloseDelete();
+            toast.success('Transaksi berhasil dihapus!', { id: toastId });
+        } catch (error) {
+            console.error(error);
+            toast.error('Gagal menghapus transaksi.', { id: toastId });
+        }
+    }
+
     const total = 2000;
     const spent = 1000;
     const left = total - spent;
 
+    console.log('id', id);
     console.log(transaction);
 
 
@@ -284,13 +314,13 @@ const Page = (props: Props) => {
                 >
                     {(item: Transaction) => (
                         <TableRow key={item._id}>
-                            <TableCell>{item.description}</TableCell>
-                            <TableCell>{item.category.name}</TableCell>
-                            <TableCell>{item.saldo.name}</TableCell>
-                            <TableCell className={item.type === 'income' ? 'text-green-600' : 'text-red-600'}>
+                            <TableCell className='text-sm' >{item.description}</TableCell>
+                            <TableCell className='text-sm'>{item.category.name}</TableCell>
+                            <TableCell className='text-sm'>{item.saldo.name}</TableCell>
+                            <TableCell className={item.type === 'income' ? 'text-green-600 text-sm' : 'text-red-600 text-sm'}>
                                 {formatRupiah(item.amount)}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className='text-sm'>
                                 <span className={`inline-block px-2 py-1 rounded-full text-xs ${item.type === 'income'
                                     ? 'bg-green-100 text-green-800'
                                     : 'bg-red-100 text-red-800'
@@ -299,8 +329,8 @@ const Page = (props: Props) => {
                                 </span>
                             </TableCell>
 
-                            <TableCell>{formatDateWithDays(item.createdAt)}</TableCell>
-                            <TableCell>
+                            <TableCell className='text-sm'>{formatDateWithDays(item.createdAt)}</TableCell>
+                            <TableCell className='text-sm'>
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => {
@@ -389,7 +419,7 @@ const Page = (props: Props) => {
                     <ButtonSecondary className="py-1 px-2 rounded-xl" onClick={onClose}>
                         Batal
                     </ButtonSecondary>
-                    <ButtonPrimary className="py-1 px-2 rounded-xl">
+                    <ButtonPrimary className="py-1 px-2 rounded-xl" onClick={handleCreateTransaction}>
                         Simpan
                     </ButtonPrimary>
                 </div>
@@ -405,6 +435,7 @@ const Page = (props: Props) => {
                             variant='bordered'
                             onSelectionChange={(e: any) => handleSelectionChangeUpdate(e, 'saldo')}
                             value={formUpdate.saldo}
+                            selectedKey={formUpdate.saldo}
                         >
                             {saldo.map((item: any) => (
                                 <AutocompleteItem textValue={item.name} key={item._id}>
@@ -420,6 +451,7 @@ const Page = (props: Props) => {
                             variant='bordered'
                             onSelectionChange={(e: any) => handleSelectionChangeUpdate(e, 'type')}
                             value={formUpdate.type}
+                            selectedKey={formUpdate.type}
                         >
                             {type.map((item) => (
                                 <AutocompleteItem textValue={item.label} key={item.key}>{item.label}</AutocompleteItem>
@@ -460,7 +492,7 @@ const Page = (props: Props) => {
                 <h1>Apakah anda yakin ingin menghapus transaksi ini?</h1>
                 <div className="flex justify-end gap-2">
                     <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={onCloseDelete}>Batal</ButtonSecondary>
-                    <ButtonPrimary className='py-1 px-2 rounded-xl'>Hapus</ButtonPrimary>
+                    <ButtonPrimary className='py-1 px-2 rounded-xl' onClick={handleDelete}>Hapus</ButtonPrimary>
                 </div>
             </ModalAlert>
         </DefaultLayout>

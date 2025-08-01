@@ -53,6 +53,17 @@ export const createTransactionModel = async (form: any, callback: any) => {
 }
 
 
+export const deleteTransaction = async (id: any) => {
+    try {
+        const result = await axiosInterceptor.delete(`/transaction/${id}`)
+        return result.data; // ✅ return data langsung
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+}
+
+
 
 
 // CAPSTER
