@@ -43,6 +43,14 @@ export const getAllTransaction = async () => {
     }
 }
 
+export const createTransactionModel = async (form: any, callback: any) => {
+    await axiosInterceptor.post('/transaction/models', form)
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            console.log(err);
+        });
+}
 
 
 

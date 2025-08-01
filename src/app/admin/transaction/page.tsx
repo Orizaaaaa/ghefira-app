@@ -179,6 +179,9 @@ const Page = (props: Props) => {
     const spent = 1000;
     const left = total - spent;
 
+    console.log(transaction);
+
+
     return (
         <DefaultLayout>
             <div className="flex justify-end mb-4 gap-3">
@@ -268,6 +271,7 @@ const Page = (props: Props) => {
                 <TableHeader>
                     <TableColumn key="description">DESKRIPSI</TableColumn>
                     <TableColumn key="category">KATEGORI</TableColumn>
+                    <TableColumn key="saldo">SALDO</TableColumn>
                     <TableColumn key="amount">JUMLAH</TableColumn>
                     <TableColumn key="type">JENIS</TableColumn>
                     <TableColumn key="createdAt">TANGGAL</TableColumn>
@@ -282,6 +286,7 @@ const Page = (props: Props) => {
                         <TableRow key={item._id}>
                             <TableCell>{item.description}</TableCell>
                             <TableCell>{item.category.name}</TableCell>
+                            <TableCell>{item.saldo.name}</TableCell>
                             <TableCell className={item.type === 'income' ? 'text-green-600' : 'text-red-600'}>
                                 {formatRupiah(item.amount)}
                             </TableCell>
@@ -293,6 +298,7 @@ const Page = (props: Props) => {
                                     {item.type === 'income' ? 'Pendapatan' : 'Pengeluaran'}
                                 </span>
                             </TableCell>
+
                             <TableCell>{formatDateWithDays(item.createdAt)}</TableCell>
                             <TableCell>
                                 <div className="flex gap-2">
