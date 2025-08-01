@@ -40,15 +40,7 @@ export const updateSaldo = async (id: any, form: any, callback: any) => {
         });
 }
 
-export const getAllCategory = async () => {
-    try {
-        const res = await axiosInterceptor.get('/category/list');
-        return res.data; // ✅ return data
-    } catch (err) {
-        console.error(err);
-        return []; // atau null, tergantung kebutuhan
-    }
-};
+
 
 // transaction
 export const getAllTransaction = async () => {
@@ -142,7 +134,25 @@ export const deleteCapster = async (id: any) => {
     }
 }
 
+// category
+export const createCategory = async (form: any, callback: any) => {
+    await axiosInterceptor.post('/category', form)
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            console.log(err);
+        });
+}
 
+export const getAllCategory = async () => {
+    try {
+        const res = await axiosInterceptor.get('/category/list');
+        return res.data; // ✅ return data
+    } catch (err) {
+        console.error(err);
+        return []; // atau null, tergantung kebutuhan
+    }
+};
 
 export const deleteCategory = (id: any, callback: any) => {
     axiosInterceptor.delete(`/category/${id}`)
