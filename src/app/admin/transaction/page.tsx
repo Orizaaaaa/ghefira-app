@@ -1,20 +1,24 @@
 'use client'
-import { getAllTransaction } from '@/api/method'
+import { getAllCategory, getAllSaldo, getAllTransaction } from '@/api/method'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import InputForm from '@/components/elements/input/InputForm'
 import ModalDefault from '@/components/fragments/modal/modal'
 import ModalAlert from '@/components/fragments/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
-import { useDisclosure } from '@heroui/react'
+import { formatRupiah } from '@/utils/helper'
+import { Autocomplete, AutocompleteItem, useDisclosure } from '@heroui/react'
 import React, { useEffect, useState } from 'react'
 import { PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts'
+
 
 type Props = {}
 
 const page = (props: Props) => {
     const [id, setId] = useState('');
     const [transaction, setTransaction] = useState([]);
+    const [category, setCategory] = useState([]);
+    const [saldo, setSaldo] = useState([]);
     const [loading, setLoading] = useState(false);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isOpenUpdate, onOpen: onOpenUpdate, onClose: onCloseUpdate } = useDisclosure();
@@ -55,15 +59,6 @@ const page = (props: Props) => {
         onOpenDelete();
     }
 
-    const categoryData = [
-        { name: 'Makanan & Minuman', value: 45 },
-        { name: 'Transportasi', value: 20 },
-        { name: 'Belanja', value: 15 },
-        { name: 'Hiburan', value: 10 },
-        { name: 'Tagihan', value: 8 },
-        { name: 'Lainnya', value: 2 }
-    ];
-
     const data = [
         {
             name: 'Spent',
@@ -75,8 +70,12 @@ const page = (props: Props) => {
     const fetchData = async () => {
         setLoading(true);
         try {
+            const resultCategory = await getAllCategory();
+            const resultSaldo = await getAllSaldo();
             const result = await getAllTransaction();
+            setSaldo(resultSaldo.data);
             setTransaction(result);
+            setCategory(resultCategory.data);
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
@@ -87,9 +86,25 @@ const page = (props: Props) => {
     useEffect(() => {
         fetchData();
     }, []);
+
+    const onSelectionChange = (_id: string) => {
+        setForm({
+            ...form,
+            saldo: _id
+        });
+    };
+    const onSelectionCategory = (type: string) => {
+        setForm({
+            ...form,
+            type: type
+        });
+    };
     const total = 2000;
     const spent = 1000;
     const left = total - spent;
+
+    console.log(saldo);
+    console.log(form);
 
     return (
         <DefaultLayout>
@@ -156,7 +171,7 @@ const page = (props: Props) => {
 
             <ModalDefault isOpen={isOpen} onClose={onClose}>
                 {/* Saldo */}
-
+                <h1 className='text-xl font-bold' >Tambah Transaksi</h1>
                 <div className="flex gap-4">
                     <InputForm
                         htmlFor="saldo"
@@ -188,6 +203,33 @@ const page = (props: Props) => {
                     onChange={handleChange}
                     value={form.description}
                 />
+
+                <div className="">
+                    <h1>Pilih Saldo</h1>
+                    <Autocomplete
+                        className="w-full"
+                        variant='bordered'
+                        onSelectionChange={(e: any) => onSelectionChange(e)}
+                        value={form.saldo}
+                    >
+                        {saldo.map((item: any) => (
+                            <AutocompleteItem textValue={item.name} key={item._id}>{item.name} <span>{formatRupiah(item.amount)}</span></AutocompleteItem>
+                        ))}
+                    </Autocomplete>
+                </div>
+                <div className="">
+                    <h1>Pilih Kategori</h1>
+                    <Autocomplete
+                        className="w-full"
+                        variant='bordered'
+                        onSelectionChange={(e: any) => onSelectionCategory(e)}
+                        value={form.type}
+                    >
+                        {category.map((item: any) => (
+                            <AutocompleteItem textValue={item.name} key={item._id}>{item.name} <span>{item.type}</span></AutocompleteItem>
+                        ))}
+                    </Autocomplete>
+                </div>
 
                 {/* Type */}
                 <div className="mt-3">

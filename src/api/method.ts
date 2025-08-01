@@ -22,6 +22,16 @@ export const getAllSaldo = async () => {
     }
 };
 
+export const getAllCategory = async () => {
+    try {
+        const res = await axiosInterceptor.get('/category/list');
+        return res.data; // ✅ return data
+    } catch (err) {
+        console.error(err);
+        return []; // atau null, tergantung kebutuhan
+    }
+};
+
 // transaction
 export const getAllTransaction = async () => {
     try {
