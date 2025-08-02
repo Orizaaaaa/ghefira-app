@@ -19,7 +19,7 @@ const page = (props: Props) => {
     const [saldo, setSaldo] = useState([]);
     const [category, setCategory] = useState([]);
     const [form, setForm] = useState({
-        user: localStorage.getItem('id') || '',
+        user: '',
         category: '',
         saldo: '',
         amount: '',
@@ -44,6 +44,13 @@ const page = (props: Props) => {
     }
 
     useEffect(() => {
+        const id = localStorage.getItem('id');
+        if (id) {
+            setForm(prev => ({
+                ...prev,
+                user: id
+            }));
+        }
         fetchData();
     }, []);
 

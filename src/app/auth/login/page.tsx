@@ -94,7 +94,8 @@ const Login = () => {
                 localStorage.setItem('role', res.data.role);
                 localStorage.setItem('token', res.data.token);
                 setLoading(false);
-
+                setErrorMsg({ email: '', password: '' });
+                setErrorLogin('');
                 // Redirect berdasarkan role
                 if (res) {
                     router.push('/admin/dashboard');
