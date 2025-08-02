@@ -83,7 +83,7 @@ const Page = (props: Props) => {
     const [rowsPerPage, setRowsPerPage] = useState(5);
 
     const [form, setForm] = useState({
-        user: localStorage.getItem('id') || '',
+        user: '',
         saldo: '',
         amount: '',
         description: '',
@@ -153,6 +153,13 @@ const Page = (props: Props) => {
     }
 
     useEffect(() => {
+        const id = localStorage.getItem('id');
+        if (id) {
+            setForm(prev => ({
+                ...prev,
+                user: id
+            }));
+        }
         fetchData();
     }, []);
 
