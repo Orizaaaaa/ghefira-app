@@ -10,9 +10,12 @@ import { formatDate, formatDateWithDays, formatRupiah } from '@/utils/helper'
 import { Autocomplete, AutocompleteItem, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@heroui/react'
 import React, { useEffect, useState, useMemo } from 'react'
 import toast from 'react-hot-toast'
+import { BiTrendingDown, BiTrendingUp } from 'react-icons/bi'
+import { BsLayers } from 'react-icons/bs'
+import { FaArrowDown, FaArrowUp } from 'react-icons/fa6'
 import { IoMdTrash } from 'react-icons/io'
 import { RiEdit2Fill } from 'react-icons/ri'
-import { PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts'
+import { Cell, Pie, PieChart, PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts'
 
 interface User {
     _id: string;
@@ -221,8 +224,17 @@ const Page = (props: Props) => {
     const spent = 1000;
     const left = total - spent;
 
-    console.log('id', id);
-    console.log(transaction);
+
+    const COLORS = ["#EF4444", "#10B981"]; // red, green
+
+    const pieData = [
+        { name: "Pengeluaran", value: spent },
+        { name: "Sisa", value: left },
+    ];
+
+    console.log('transaksi', transaction);
+    console.log('saldo', saldo);
+
 
 
     return (
@@ -231,50 +243,91 @@ const Page = (props: Props) => {
                 <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={handleOpenCreate}> + Tambah Transaksi </ButtonSecondary>
             </div>
 
-            <div className="mx-auto">
-                <div className="flex justify-between items-center mb-2">
-                    <h2 className="font-semibold text-black">My Budget</h2>
-                    <button className="text-sm text-gray-500 hover:underline">View all →</button>
-                </div>
+            <div className="flex flex-col gap-6">
+                {/* Chart Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-100 p-4 rounded-xl shadow">
 
-                <div className="relative bg-slate-200 rounded-xl flex flex-col items-center py-3">
-                    <RadialBarChart
-                        width={400}
-                        height={200}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius="70%"
-                        outerRadius="100%"
-                        startAngle={180}
-                        endAngle={0}
-                        data={data}
-                    >
-                        <PolarAngleAxis
-                            type="number"
-                            domain={[0, 100]}
-                            angleAxisId={0}
-                            tick={false}
-                        />
-                        <RadialBar
-                            background
-                            dataKey="value"
-                            cornerRadius={10}
-                        />
-                    </RadialBarChart>
+                    {/* Radial Chart */}
+                    <div className="relative flex flex-col items-center justify-center">
+                        <RadialBarChart
+                            width={150}
+                            height={150}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius="70%"
+                            outerRadius="100%"
+                            startAngle={180}
+                            endAngle={0}
+                            data={data}
+                        >
+                            <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                            <RadialBar background dataKey="value" cornerRadius={10} />
+                        </RadialBarChart>
 
-                    <div className="absolute top-[55%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-                        <p className="text-sm text-gray-500">Total to spend</p>
-                        <p className="text-2xl font-bold text-blue-600">${total.toLocaleString()}</p>
+                        <div className="absolute top-[52%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+                            <p className="text-xs text-gray-500">Total Anggaran</p>
+                            <p className="text-xl font-bold text-blue-600">${total.toLocaleString()}</p>
+                        </div>
+
+                        <div className="w-full flex justify-around text-xs mt-2">
+                            <div className="text-center">
+                                <p className="text-gray-400">Terpakai</p>
+                                <p className="text-red-500 font-semibold">{spent.toLocaleString()}</p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-gray-400">Tersisa</p>
+                                <p className="text-green-500 font-semibold">{left.toLocaleString()}</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="w-full flex justify-around text-sm">
-                        <div className="text-center">
-                            <p className="text-gray-400">Spent</p>
-                            <p className="text-red-500 font-semibold">{spent.toLocaleString()}</p>
+                    {/* Pie Chart */}
+                    <div className="flex flex-col items-center justify-center">
+                        <h2 className="font-semibold text-black text-sm mb-2">Distribusi Saldo</h2>
+                        <PieChart width={150} height={150}>
+                            <Pie
+                                data={pieData}
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={60}
+                                dataKey="value"
+                                label
+                            >
+                                {pieData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                            </Pie>
+                        </PieChart>
+                    </div>
+                </div>
+
+                {/* Statistik Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="bg-white p-4 rounded-xl shadow flex items-center gap-4">
+                        <div className="bg-blue-100 p-2 rounded-full">
+                            <BsLayers className="text-blue-500 w-5 h-5" />
                         </div>
-                        <div className="text-center">
-                            <p className="text-gray-400">Left</p>
-                            <p className="text-green-500 font-semibold">{left.toLocaleString()}</p>
+                        <div>
+                            <p className="text-gray-500 text-sm">Total Kategori</p>
+                            <h2 className="text-xl font-bold">10</h2>
+                        </div>
+                    </div>
+                    <div className="bg-green-100 p-4 rounded-xl shadow flex items-center gap-4">
+                        <div className="bg-green-200 p-2 rounded-full">
+                            <BiTrendingUp className="text-green-800 w-5 h-5" />
+                        </div>
+                        <div>
+                            <p className="text-green-800 text-sm">Pendapatan</p>
+                            <h2 className="text-lg font-semibold text-green-900">10</h2>
+                        </div>
+                    </div>
+                    <div className="bg-red-100 p-4 rounded-xl shadow flex items-center gap-4">
+                        <div className="bg-red-200 p-2 rounded-full">
+                            <BiTrendingDown className="text-red-800 w-5 h-5" />
+                        </div>
+                        <div>
+                            <p className="text-red-800 text-sm">Pengeluaran</p>
+                            <h2 className="text-lg font-semibold text-red-900">10</h2>
                         </div>
                     </div>
                 </div>
@@ -334,15 +387,15 @@ const Page = (props: Props) => {
                                 {formatRupiah(item.amount)}
                             </TableCell>
                             <TableCell className='text-sm'>
-                                <span className={
-                                    `inline-block px-2 py-1 rounded-full text-xs ${item.type === 'income'
+                                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs
+                                    ${item.type === 'income'
                                         ? 'bg-green-100 text-green-800'
-                                        : 'bg-red-100 text-red-800'
-                                    }`}
-                                >
+                                        : 'bg-red-100 text-red-800'}`}>
+                                    {item.type === 'income' ? <FaArrowDown className="text-green-500" /> : <FaArrowUp className="text-red-500" />}
                                     {item.type === 'income' ? 'Pendapatan' : 'Pengeluaran'}
                                 </span>
                             </TableCell>
+
 
                             <TableCell className='text-sm'>{formatDateWithDays(item.createdAt)}</TableCell>
                             <TableCell className='text-sm'>
