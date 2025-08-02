@@ -6,9 +6,12 @@ import InputForm from '@/components/elements/input/InputForm'
 import ModalDefault from '@/components/fragments/modal/modal'
 import ModalAlert from '@/components/fragments/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
+import { formatDateWithDays } from '@/utils/helper'
 import { Autocomplete, AutocompleteItem, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@heroui/react'
 import React, { useEffect, useState, useMemo } from 'react'
 import toast from 'react-hot-toast'
+import { IoMdTrash } from 'react-icons/io'
+import { RiEdit2Fill } from 'react-icons/ri'
 
 type Category = {
     _id: string;
@@ -172,8 +175,8 @@ const CategoryPage = () => {
                     aria-label="Daftar Kategori"
                     isStriped
                     classNames={{
-                        wrapper: "min-h-[400px]",
-                        th: 'bg-gray-100 text-black font-semibold',
+                        wrapper: "min-h-[250px]",
+                        th: 'bg-secondaryGreen text-white font-semibold',
                         td: 'text-black',
                     }}
                     bottomContent={
@@ -215,20 +218,20 @@ const CategoryPage = () => {
                                     </span>
                                 </TableCell>
                                 <TableCell className="max-w-xs truncate">{item.description}</TableCell>
-                                <TableCell>{formatDate(item.createdAt)}</TableCell>
+                                <TableCell>{formatDateWithDays(item.createdAt)}</TableCell>
                                 <TableCell>
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => handleOpenUpdate(item)}
                                             className="text-blue-500 hover:text-blue-700"
                                         >
-                                            Edit
+                                            <RiEdit2Fill size={20} />
                                         </button>
                                         <button
                                             onClick={() => handleOpenDelete(item._id)}
                                             className="text-red-500 hover:text-red-700"
                                         >
-                                            Hapus
+                                            <IoMdTrash size={20} />
                                         </button>
                                     </div>
                                 </TableCell>
@@ -240,6 +243,7 @@ const CategoryPage = () => {
 
             {/* Add Category Modal */}
             <ModalDefault isOpen={isOpen} onClose={onClose}>
+                <h1 className="text-2xl font-semibold mb-4" >Tambah Kategori</h1>
                 <div className="space-y-4">
                     <InputForm
                         htmlFor="name"
@@ -286,7 +290,7 @@ const CategoryPage = () => {
 
             {/* Edit Category Modal */}
             <ModalDefault isOpen={isOpenUpdate} onClose={onCloseUpdate} >
-                <h1>Edit Kategori</h1>
+                <h1 className="text-2xl font-semibold mb-4" >Edit Kategori</h1>
                 <div className="space-y-4">
                     <InputForm
                         htmlFor="name"
