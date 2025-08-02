@@ -106,38 +106,82 @@ function Page() {
                     </div>
                 </div>
 
-                <div className="col-span-2 rounded-xl ">
+                <div className="col-span-2 space-y-4 md:space-y-6">
+                    <div className="bg-gradient-to-r from-green-400 to-emerald-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300  flex flex-col group">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-sm font-medium text-emerald-100">Total Saldo Masuk</p>
+                                <div className="flex items-end gap-2 mt-2">
+                                    <h2 className="text-4xl font-bold">${current}</h2>
+                                    <p className="text-lg text-emerald-100 mb-1">/ {total}</p>
+                                </div>
+                            </div>
+                            <div className="bg-white/20 rounded-full p-2 group-hover:bg-white/30 transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                            </div>
+                        </div>
 
-                    <div className="bg-primaryGreen rounded-xl p-4 text-white shadow-md w-full ">
-                        <p className="text-sm text-gray-200">Saldo Masuk</p>
-                        <h2 className="text-3xl font-bold">${current.toLocaleString()}</h2>
-                        <p className="text-sm text-gray-300">/ {total.toLocaleString()}</p>
-                        <p className="mt-2 text-sm text-gray-200">{percentage}%</p>
-                        <div className="mt-2 flex gap-[2px]">
-                            {Array.from({ length: 100 }, (_, i) => (
-                                <div
-                                    key={i}
-                                    className={`h-2 w-[2px] rounded-sm ${i < percentage ? 'bg-white' : 'bg-gray-700'
-                                        }`}
-                                />
-                            ))}
+                        <div className="mt-6">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-sm font-medium text-emerald-100">Progress</span>
+                                <span className="text-sm font-bold">{percentage}%</span>
+                            </div>
+                            <div className="relative pt-1">
+                                <div className="overflow-hidden h-3 mb-4 text-xs flex rounded-full bg-white/20">
+                                    <div
+                                        style={{ width: `${percentage}%` }}
+                                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-white transition-all duration-500 ease-out"
+                                    ></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="bg-primaryGreen rounded-xl p-4 text-white shadow-md w-full mt-5" >
-                        <div className="flex justify-between items-center mb-1">
-                            <p className="text-sm text-gray-400">Saldo Keluar</p>
-                            <div className="text-xs text-red-400 flex items-center gap-1">
-                                <span className="w-2 h-2 bg-red-500 rounded-full" />
-                                -9%
+                    {/* Saldo Keluar Card - Responsive */}
+                    <div className="bg-gradient-to-r from-rose-500 to-pink-600 rounded-2xl p-4 md:p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 group">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-3 md:mb-4">
+                            <div className="flex-1">
+                                <div className="flex flex-wrap items-center gap-2 mb-1">
+                                    <p className="text-xs md:text-sm font-medium text-rose-100">Total Saldo Keluar</p>
+                                    <div className="text-xs px-2 py-1 bg-white/20 rounded-full flex items-center gap-1 w-fit">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                                        </svg>
+                                        <span>9%</span>
+                                    </div>
+                                </div>
+                                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">$11,239.00</h2>
+                            </div>
+                            <div className="flex justify-end sm:block">
+                                <div className="bg-white/10 p-1 md:p-2 rounded-lg w-fit">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
                             </div>
                         </div>
-                        <h2 className="text-3xl font-bold mb-2">$11,239.00</h2>
-                        <ResponsiveContainer width="100%" height={60}>
-                            <BarChart data={dataSideChart}>
-                                <Bar dataKey="value" fill="#ff5c5c" radius={[4, 4, 0, 0]} barSize={4} />
-                            </BarChart>
-                        </ResponsiveContainer>
+
+                        <div className="mt-1 md:mt-2">
+                            <ResponsiveContainer width="100%" height={60}>
+                                <BarChart data={dataSideChart}>
+                                    <defs>
+                                        <linearGradient id="colorRedBar" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#ff8a8a" stopOpacity={0.9} />
+                                            <stop offset="95%" stopColor="#ff5252" stopOpacity={0.9} />
+                                        </linearGradient>
+                                    </defs>
+                                    <Bar
+                                        dataKey="value"
+                                        fill="url(#colorRedBar)"
+                                        radius={[4, 4, 0, 0]}
+                                        barSize={6}
+                                        animationDuration={2000}
+                                    />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
                     </div>
                 </div>
             </div>
