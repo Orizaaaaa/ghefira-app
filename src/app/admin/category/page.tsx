@@ -10,6 +10,8 @@ import { formatDateWithDays } from '@/utils/helper'
 import { Autocomplete, AutocompleteItem, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@heroui/react'
 import React, { useEffect, useState, useMemo } from 'react'
 import toast from 'react-hot-toast'
+import { BsBox } from 'react-icons/bs'
+import { FiFolder, FiTrendingDown, FiTrendingUp } from 'react-icons/fi'
 import { IoMdTrash } from 'react-icons/io'
 import { RiEdit2Fill } from 'react-icons/ri'
 
@@ -168,6 +170,43 @@ const CategoryPage = () => {
                     + Tambah Kategori
                 </ButtonSecondary>
             </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-white p-5 rounded-2xl shadow-lg flex items-center gap-4">
+                    <div className="bg-blue-100 text-blue-600 p-3 rounded-full">
+                        <BsBox size={24} />
+                    </div>
+                    <div>
+                        <p className="text-sm text-gray-500">Total Kategori</p>
+                        <h2 className="text-2xl font-bold text-gray-800">{categories.length}</h2>
+                    </div>
+                </div>
+
+                <div className="bg-green-50 p-5 rounded-2xl shadow-lg flex items-center gap-4">
+                    <div className="bg-green-200 text-green-700 p-3 rounded-full">
+                        <FiTrendingUp size={24} />
+                    </div>
+                    <div>
+                        <p className="text-sm text-green-600">Kategori Pendapatan</p>
+                        <h2 className="text-xl font-semibold text-green-800">
+                            {categories.filter((c) => c.type === 'income').length}
+                        </h2>
+                    </div>
+                </div>
+
+                <div className="bg-red-50 p-5 rounded-2xl shadow-lg flex items-center gap-4">
+                    <div className="bg-red-200 text-red-700 p-3 rounded-full">
+                        <FiTrendingDown size={24} />
+                    </div>
+                    <div>
+                        <p className="text-sm text-red-600">Kategori Pengeluaran</p>
+                        <h2 className="text-xl font-semibold text-red-800">
+                            {categories.filter((c) => c.type === 'expense').length}
+                        </h2>
+                    </div>
+                </div>
+            </div>
+
 
             {/* Category Table */}
             <div className="bg-white rounded-xl shadow-md overflow-hidden">
