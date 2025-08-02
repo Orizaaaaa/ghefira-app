@@ -11,7 +11,7 @@ import { Autocomplete, AutocompleteItem, Pagination, Table, TableBody, TableCell
 import React, { useEffect, useState, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import { BiTrendingDown, BiTrendingUp } from 'react-icons/bi'
-import { BsLayers } from 'react-icons/bs'
+import { BsBox, BsLayers } from 'react-icons/bs'
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa6'
 import { IoMdTrash } from 'react-icons/io'
 import { RiEdit2Fill } from 'react-icons/ri'
@@ -244,68 +244,12 @@ const Page = (props: Props) => {
             </div>
 
             <div className="flex flex-col gap-6">
-                {/* Chart Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-100 p-4 rounded-xl shadow">
-
-                    {/* Radial Chart */}
-                    <div className="relative flex flex-col items-center justify-center">
-                        <RadialBarChart
-                            width={150}
-                            height={150}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius="70%"
-                            outerRadius="100%"
-                            startAngle={180}
-                            endAngle={0}
-                            data={data}
-                        >
-                            <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
-                            <RadialBar background dataKey="value" cornerRadius={10} />
-                        </RadialBarChart>
-
-                        <div className="absolute top-[52%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-                            <p className="text-xs text-gray-500">Total Anggaran</p>
-                            <p className="text-xl font-bold text-blue-600">${total.toLocaleString()}</p>
-                        </div>
-
-                        <div className="w-full flex justify-around text-xs mt-2">
-                            <div className="text-center">
-                                <p className="text-gray-400">Terpakai</p>
-                                <p className="text-red-500 font-semibold">{spent.toLocaleString()}</p>
-                            </div>
-                            <div className="text-center">
-                                <p className="text-gray-400">Tersisa</p>
-                                <p className="text-green-500 font-semibold">{left.toLocaleString()}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Pie Chart */}
-                    <div className="flex flex-col items-center justify-center">
-                        <h2 className="font-semibold text-black text-sm mb-2">Distribusi Saldo</h2>
-                        <PieChart width={150} height={150}>
-                            <Pie
-                                data={pieData}
-                                cx="50%"
-                                cy="50%"
-                                outerRadius={60}
-                                dataKey="value"
-                                label
-                            >
-                                {pieData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                ))}
-                            </Pie>
-                        </PieChart>
-                    </div>
-                </div>
 
                 {/* Statistik Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     <div className="bg-white p-4 rounded-xl shadow flex items-center gap-4">
                         <div className="bg-blue-100 p-2 rounded-full">
-                            <BsLayers className="text-blue-500 w-5 h-5" />
+                            <BsBox className="text-blue-500 w-5 h-5" />
                         </div>
                         <div>
                             <p className="text-gray-500 text-sm">Total Kategori</p>
