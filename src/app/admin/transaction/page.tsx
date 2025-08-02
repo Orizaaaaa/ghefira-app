@@ -334,10 +334,12 @@ const Page = (props: Props) => {
                                 {formatRupiah(item.amount)}
                             </TableCell>
                             <TableCell className='text-sm'>
-                                <span className={`inline-block px-2 py-1 rounded-full text-xs ${item.type === 'income'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-red-100 text-red-800'
-                                    }`}>
+                                <span className={
+                                    `inline-block px-2 py-1 rounded-full text-xs ${item.type === 'income'
+                                        ? 'bg-green-100 text-green-800'
+                                        : 'bg-red-100 text-red-800'
+                                    }`}
+                                >
                                     {item.type === 'income' ? 'Pendapatan' : 'Pengeluaran'}
                                 </span>
                             </TableCell>
