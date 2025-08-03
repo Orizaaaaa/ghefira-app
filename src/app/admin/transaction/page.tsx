@@ -130,19 +130,14 @@ const Page = (props: Props) => {
         onOpenDelete();
     }
 
-    const data = [
-        {
-            name: 'Spent',
-            value: 50,
-            fill: '#3B82F6',
-        },
-    ];
 
     const fetchData = async () => {
         setLoading(true);
         try {
+            const resultCategory = await getAllCategory();
             const resultSaldo = await getAllSaldo();
             const result = await getAllTransaction();
+            setCategory(resultCategory.data);
             setSaldo(resultSaldo.data);
             setTransaction(result);
         } catch (error) {
@@ -229,18 +224,21 @@ const Page = (props: Props) => {
     }
     const total = 2000;
     const spent = 1000;
-    const left = total - spent;
 
+    let totalExpense = 0;
+    let totalIncome = 0;
 
-    const COLORS = ["#EF4444", "#10B981"]; // red, green
+    transaction?.data.forEach(transaction => {
+        if (transaction.type === "expense") { // Typo: seharusnya "expense"
+            totalExpense += transaction.amount;
+        } else if (transaction.type === "income") {
+            totalIncome += transaction.amount;
+        }
+    });
 
-    const pieData = [
-        { name: "Pengeluaran", value: spent },
-        { name: "Sisa", value: left },
-    ];
-
-    console.log('transaksi', transaction);
+    console.log('transaksi', transaction?.data);
     console.log('saldo', saldo);
+    console.log('category', category.length);
 
 
 
@@ -260,7 +258,7 @@ const Page = (props: Props) => {
                         </div>
                         <div>
                             <p className="text-gray-500 text-sm">Total Kategori</p>
-                            <h2 className="text-xl font-bold">10</h2>
+                            <h2 className="text-xl font-bold">{category.length}</h2>
                         </div>
                     </div>
                     <div className="bg-green-100 p-4 rounded-xl shadow flex items-center gap-4">
@@ -269,7 +267,7 @@ const Page = (props: Props) => {
                         </div>
                         <div>
                             <p className="text-green-800 text-sm">Pendapatan</p>
-                            <h2 className="text-lg font-semibold text-green-900">10</h2>
+                            <h2 className="text-lg font-semibold text-green-900">{formatRupiah(totalIncome)}</h2>
                         </div>
                     </div>
                     <div className="bg-red-100 p-4 rounded-xl shadow flex items-center gap-4">
@@ -278,7 +276,7 @@ const Page = (props: Props) => {
                         </div>
                         <div>
                             <p className="text-red-800 text-sm">Pengeluaran</p>
-                            <h2 className="text-lg font-semibold text-red-900">10</h2>
+                            <h2 className="text-lg font-semibold text-red-900">{formatRupiah(totalExpense)}</h2>
                         </div>
                     </div>
                 </div>
