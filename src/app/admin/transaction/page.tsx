@@ -222,8 +222,6 @@ const Page = (props: Props) => {
             toast.error('Gagal mengubah transaksi.', { id: toastId });
         }
     }
-    const total = 2000;
-    const spent = 1000;
 
     let totalExpense = 0;
     let totalIncome = 0;
