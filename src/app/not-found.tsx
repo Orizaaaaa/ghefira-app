@@ -1,8 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { Player } from '@lottiefiles/react-lottie-player';
+import dynamic from 'next/dynamic';
 import notFoundAnimation from '../../public/404.json';
+
+// Import Player secara dinamis agar hanya muncul di client
+const Player = dynamic(
+    () => import('@lottiefiles/react-lottie-player').then(mod => mod.Player),
+    { ssr: false }
+);
 
 export default function NotFound() {
     return (
