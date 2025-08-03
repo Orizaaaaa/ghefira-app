@@ -12,11 +12,19 @@ import toast from 'react-hot-toast'
 import { FaInfoCircle } from 'react-icons/fa'
 import { FaBrain } from 'react-icons/fa6'
 import { MdRestartAlt } from 'react-icons/md'
-
+type ModelStatus = {
+    isModelReady: boolean;
+    lastTrainingDate: string;
+    modelPath: string;
+    modelExists: boolean;
+    backupExists: boolean;
+    classifierInfo: any; // Atau lebih detail kalau kamu tahu strukturnya
+};
 type Props = {}
 
 const page = (props: Props) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
+    const [responseModel, setResponseModel] = useState<ModelStatus | null>(null);
     const [saldo, setSaldo] = useState([]);
     const [category, setCategory] = useState([]);
     const [form, setForm] = useState({
@@ -127,6 +135,7 @@ const page = (props: Props) => {
             await getStatusModel((res: any) => {
                 toast.success('status model berhasil diambil!', { id: loadingToast });
                 console.log(res);
+                setResponseModel(res.data);
             });
         } catch (error) {
             console.error(error);
@@ -155,6 +164,19 @@ const page = (props: Props) => {
                     Status Model
                 </ButtonSecondary>
             </div>
+
+            {responseModel && (
+                <div className="space-y-2">
+                    <h1>desain nya belum kepikiran hhehhee 🐷</h1>
+                    <p>Status: {responseModel.isModelReady ? 'Siap' : 'Belum siap'}</p>
+                    <p>Terakhir Training: {responseModel.lastTrainingDate}</p>
+                    <p>Path Model: {responseModel.modelPath}</p>
+                    <p>Model Ada: {responseModel.modelExists ? 'Ya' : 'Tidak'}</p>
+                    <p>Backup Ada: {responseModel.backupExists ? 'Ya' : 'Tidak'}</p>
+                    <p>Classifier Info: {JSON.stringify(responseModel.classifierInfo)}</p>
+                </div>
+            )}
+
 
             <ModalDefault isOpen={isOpen} onClose={onClose}>
                 <h1 className="text-2xl font-bold mb-4" >Latih Model</h1>
