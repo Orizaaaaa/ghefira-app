@@ -101,6 +101,24 @@ export const createTransactionTrainModel = async (form: any, callback: any) => {
         });
 }
 
+export const resetModels = async (callback: any) => {
+    await axiosInterceptor.post('/transaction/reset-model')
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            console.log(err);
+        });
+}
+
+
+export const getStatusModel = async (callback: any) => {
+    await axiosInterceptor.get('/transaction/model-status')
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            console.log(err);
+        });
+}
 
 // CAPSTER
 export const getAllCapster = async () => {

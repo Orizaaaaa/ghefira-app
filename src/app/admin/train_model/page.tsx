@@ -1,5 +1,5 @@
 'use client'
-import { createTransactionTrainModel, getAllCategory, getAllSaldo } from '@/api/method'
+import { createTransactionTrainModel, getAllCategory, getAllSaldo, getStatusModel, resetModels } from '@/api/method'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import InputForm from '@/components/elements/input/InputForm'
@@ -107,6 +107,34 @@ const page = (props: Props) => {
         }
     };
 
+
+    const handleResetModel = async () => {
+        const loadingToast = toast.loading('Sedang mereset model...');
+        try {
+            await resetModels((res: any) => {
+                toast.success('Model berhasil direset!', { id: loadingToast });
+            });
+        } catch (error) {
+            console.error(error);
+            toast.error('Gagal mereset model!', { id: loadingToast });
+        }
+    };
+
+
+    const handleStatusModel = async () => {
+        const loadingToast = toast.loading('Sedang mengambil status model...');
+        try {
+            await getStatusModel((res: any) => {
+                toast.success('status model berhasil diambil!', { id: loadingToast });
+                console.log(res);
+            });
+        } catch (error) {
+            console.error(error);
+            toast.error('Gagal status model!', { id: loadingToast });
+        }
+    }
+
+
     console.log(category);
     console.log(form);
 
@@ -118,11 +146,11 @@ const page = (props: Props) => {
                     <FaBrain />
                     Latih model
                 </ButtonSecondary>
-                <ButtonSecondary className="py-2 px-4 rounded-lg flex items-center gap-2">
+                <ButtonSecondary onClick={handleResetModel} className="py-2 px-4 rounded-lg flex items-center gap-2">
                     <MdRestartAlt />
                     Reset model
                 </ButtonSecondary>
-                <ButtonSecondary className="py-2 px-4 rounded-lg flex items-center gap-2">
+                <ButtonSecondary onClick={handleStatusModel} className="py-2 px-4 rounded-lg flex items-center gap-2">
                     <FaInfoCircle />
                     Status Model
                 </ButtonSecondary>
