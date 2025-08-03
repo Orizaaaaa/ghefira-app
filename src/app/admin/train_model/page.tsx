@@ -1,5 +1,5 @@
 'use client'
-import { getAllCategory, getAllSaldo } from '@/api/method'
+import { createTransactionTrainModel, getAllCategory, getAllSaldo } from '@/api/method'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import InputForm from '@/components/elements/input/InputForm'
@@ -8,6 +8,7 @@ import DefaultLayout from '@/components/layouts/DefaultLayout'
 import { formatRupiah } from '@/utils/helper'
 import { Autocomplete, AutocompleteItem, useDisclosure } from '@heroui/react'
 import React, { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 import { FaInfoCircle } from 'react-icons/fa'
 import { FaBrain } from 'react-icons/fa6'
 import { MdRestartAlt } from 'react-icons/md'
@@ -67,6 +68,44 @@ const page = (props: Props) => {
         }));
     };
 
+    const handleSubmitModel = async () => {
+        // Validasi: semua field wajib diisi
+        const { user, category, saldo, amount, description, type } = form;
+
+        if (!user || !category || !saldo || !amount || !description || !type) {
+            toast.error('Semua data harus diisi!');
+            return;
+        }
+
+        const loadingToast = toast.loading('Sedang menyimpan data...');
+        try {
+            await createTransactionTrainModel(form, (result: any) => {
+                console.log(result);
+                setForm({
+                    user: '',
+                    category: '',
+                    saldo: '',
+                    amount: '',
+                    description: '',
+                    type: ''
+                });
+
+                const id = localStorage.getItem('id');
+                if (id) {
+                    setForm(prev => ({
+                        ...prev,
+                        user: id
+                    }));
+                }
+
+                toast.success('Data berhasil disimpan!', { id: loadingToast });
+                onClose();
+            });
+        } catch (error) {
+            console.error(error);
+            toast.error('Gagal menyimpan data!', { id: loadingToast });
+        }
+    };
 
     console.log(category);
     console.log(form);
@@ -157,7 +196,7 @@ const page = (props: Props) => {
                     <ButtonSecondary className="py-1 px-4 rounded-xl" onClick={onClose}>
                         Batal
                     </ButtonSecondary>
-                    <ButtonPrimary className="py-1 px-4 rounded-xl" >
+                    <ButtonPrimary className="py-1 px-4 rounded-xl" onClick={handleSubmitModel} >
                         Simpan
                     </ButtonPrimary>
                 </div>
