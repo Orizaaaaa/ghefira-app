@@ -11,6 +11,7 @@ import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { FaInfoCircle } from 'react-icons/fa'
 import { FaBrain } from 'react-icons/fa6'
+import { LuDatabase } from 'react-icons/lu'
 import { MdRestartAlt } from 'react-icons/md'
 type ModelStatus = {
     isModelReady: boolean;
@@ -162,37 +163,37 @@ const page = (props: Props) => {
 
     return (
         <DefaultLayout>
-            <div className="flex justify-end mb-4 gap-3">
-                <ButtonSecondary className="py-2 px-4 rounded-lg flex items-center gap-2" onClick={onOpen}>
-                    <FaBrain />
-                    Masukan dataset
-                </ButtonSecondary>
-                <ButtonSecondary onClick={handleResetModel} className="py-2 px-4 rounded-lg flex items-center gap-2">
-                    <MdRestartAlt />
-                    Reset model
-                </ButtonSecondary>
-                <ButtonSecondary onClick={handleStatusModel} className="py-2 px-4 rounded-lg flex items-center gap-2">
-                    <FaInfoCircle />
-                    Status Model
-                </ButtonSecondary>
-                <ButtonSecondary onClick={handleTrainDataset} className="py-2 px-4 rounded-lg flex items-center gap-2">
-                    <FaInfoCircle />
-                    Latih dataset
-                </ButtonSecondary>
+
+
+
+            <div className="flex justify-end mb-4 gap-5">
+                <div onClick={handleTrainDataset} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
+                    <FaBrain color='#5E936C' size={24} />
+                </div>
+                <div onClick={onOpen} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
+                    <LuDatabase color='#5E936C' size={24} />
+                </div>
+                <div onClick={handleStatusModel} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
+                    <FaInfoCircle color='#5E936C' size={24} />
+                </div>
+                <div onClick={handleResetModel} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
+                    <MdRestartAlt color='#5E936C' size={24} />
+                </div>
             </div>
 
-            {responseModel && (
-                <div className="space-y-2">
-                    <h1>desain nya belum kepikiran hhehhee 🐷</h1>
-                    <p>Status: {responseModel.isModelReady ? 'Siap' : 'Belum siap'}</p>
-                    <p>Terakhir Training: {responseModel.lastTrainingDate}</p>
-                    <p>Path Model: {responseModel.modelPath}</p>
-                    <p>Model Ada: {responseModel.modelExists ? 'Ya' : 'Tidak'}</p>
-                    <p>Backup Ada: {responseModel.backupExists ? 'Ya' : 'Tidak'}</p>
-                    <p>Classifier Info: {JSON.stringify(responseModel.classifierInfo)}</p>
-                </div>
-            )}
-
+            <div className="min-h-[400px]  p-4 border-2 border-gray-300 rounded-xl" >
+                {responseModel && (
+                    <div className="space-y-2">
+                        <h1>desain nya belum kepikiran hhehhee 🐷</h1>
+                        <p>Status: {responseModel.isModelReady ? 'Siap' : 'Belum siap'}</p>
+                        <p>Terakhir Training: {responseModel.lastTrainingDate}</p>
+                        <p>Path Model: {responseModel.modelPath}</p>
+                        <p>Model Ada: {responseModel.modelExists ? 'Ya' : 'Tidak'}</p>
+                        <p>Backup Ada: {responseModel.backupExists ? 'Ya' : 'Tidak'}</p>
+                        <p>Classifier Info: {JSON.stringify(responseModel.classifierInfo)}</p>
+                    </div>
+                )}
+            </div>
 
             <ModalDefault isOpen={isOpen} onClose={onClose}>
                 <h1 className="text-2xl font-bold mb-4" >Latih Model</h1>
