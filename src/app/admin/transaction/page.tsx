@@ -297,6 +297,9 @@ const Page = (props: Props) => {
                                 showControls
                                 showShadow
                                 color="primary"
+                                classNames={{
+                                    cursor: "bg-primaryGreen text-white cursor-pointer"
+                                }}
                                 page={currentPage}
                                 total={totalPages}
                                 onChange={setCurrentPage}

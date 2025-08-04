@@ -281,6 +281,9 @@ const page = (props: Props) => {
                                 isCompact
                                 showControls
                                 showShadow
+                                classNames={{
+                                    cursor: "bg-primaryGreen text-white cursor-pointer"
+                                }}
                                 color="primary"
                                 page={currentPage}
                                 total={totalPages}

@@ -224,6 +224,9 @@ const CategoryPage = () => {
                                 <Pagination
                                     isCompact
                                     showControls
+                                    classNames={{
+                                        cursor: "bg-primaryGreen text-white cursor-pointer"
+                                    }}
                                     color="primary"
                                     page={page}
                                     total={pages}
