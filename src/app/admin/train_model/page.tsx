@@ -163,23 +163,25 @@ const page = (props: Props) => {
 
     return (
         <DefaultLayout>
-
-
-
-            <div className="flex justify-end mb-4 gap-5">
-                <div onClick={handleTrainDataset} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
-                    <FaBrain color='#5E936C' size={24} />
-                </div>
-                <div onClick={onOpen} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
+            <div className="flex justify-between items-center mb-5">
+                <ButtonSecondary className='p-3 rounded-xl flex justify-center items-center gap-2 text-primaryGreen' onClick={onOpen} >
                     <LuDatabase color='#5E936C' size={24} />
-                </div>
-                <div onClick={handleStatusModel} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
-                    <FaInfoCircle color='#5E936C' size={24} />
-                </div>
-                <div onClick={handleResetModel} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
-                    <MdRestartAlt color='#5E936C' size={24} />
+                    Tambah Dataset
+                </ButtonSecondary>
+                <div className="flex  gap-5">
+                    <div onClick={handleTrainDataset} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
+                        <FaBrain color='#5E936C' size={24} />
+                    </div>
+                    <div onClick={handleStatusModel} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
+                        <FaInfoCircle color='#5E936C' size={24} />
+                    </div>
+                    <div onClick={handleResetModel} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
+                        <MdRestartAlt color='#5E936C' size={24} />
+                    </div>
                 </div>
             </div>
+
+
 
             <div className="min-h-[400px]  p-4 border-2 border-gray-300 rounded-xl" >
                 {responseModel && (
