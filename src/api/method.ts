@@ -129,6 +129,40 @@ export const trainDataset = async (callback: any) => {
         });
 }
 
+export const getSumaryMounth = async (
+    month: number,
+    year: number,
+    callback: any
+) => {
+    try {
+        const response = await axiosInterceptor.get('/dashboard/summary', {
+            params: {
+                month,
+                year,
+            },
+        });
+        callback(response.data);
+    } catch (error) {
+        console.error(error);
+        callback(error);
+    }
+};
+
+export const getSummaryPerMounth = async (
+    year: number,
+    callback: any
+) => {
+    try {
+        const response = await axiosInterceptor.get(`/dashboard/chart/${year}`);
+        callback(response);
+    } catch (error) {
+        console.error(error);
+        callback(error);
+    }
+};
+
+
+
 // CAPSTER
 export const getAllCapster = async () => {
     try {

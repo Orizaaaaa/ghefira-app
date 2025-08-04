@@ -1,5 +1,6 @@
 'use client';
 
+import { getSummaryPerMounth } from '@/api/method';
 import { man } from '@/app/image';
 import DefaultLayout from '@/components/layouts/DefaultLayout';
 import Image from 'next/image';
@@ -30,7 +31,7 @@ function Page() {
     const [jumlahPeminjam, setJumlahPeminjam] = useState(0);
     const [jumlahBuku, setJumlahBuku] = useState(0);
     const [totalDenda, setTotalDenda] = useState(0);
-    const [rows, setRows] = useState<Row[]>([]);
+    const [cart, setCart] = useState([])
 
     const data = [
         { date: 'May 15', value: 100 },
@@ -51,6 +52,33 @@ function Page() {
     const dataSideChart = Array.from({ length: 30 }, () => ({
         value: Math.floor(Math.random() * 1000),
     }));
+
+    const fetchData = async () => {
+        try {
+            await getSummaryPerMounth(2025, (res: any) => {
+                const income = res.data.income;
+                const expense = res.data.expense;
+
+                const merged = income.map((item: any, index: number) => ({
+                    date: item.date,
+                    income: item.total,
+                    expense: expense[index]?.total || 0,
+                }));
+
+                setCart(merged); // <== data ini dipakai untuk chart
+            });
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    console.log(cart);
 
     return (
         <DefaultLayout>
@@ -84,7 +112,7 @@ function Page() {
 
                     <div className="p-4 rounded-xl shadow-lg w-full h-[300px] mt-5">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={data}>
+                            <LineChart data={cart}>
                                 <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#1a1a1a" />
                                 <XAxis dataKey="date" stroke="#666" />
                                 <YAxis hide />
@@ -92,17 +120,38 @@ function Page() {
                                     contentStyle={{ backgroundColor: '#222', border: 'none' }}
                                     labelStyle={{ color: '#fff' }}
                                     cursor={{ stroke: '#00ff88', strokeWidth: 1 }}
+                                    formatter={(value: any) =>
+                                        new Intl.NumberFormat('id-ID', {
+                                            style: 'currency',
+                                            currency: 'IDR',
+                                            minimumFractionDigits: 0,
+                                        }).format(value)
+                                    }
                                 />
+                                {/* Garis Hijau: Income */}
                                 <Line
                                     type="monotone"
-                                    dataKey="value"
+                                    dataKey="income"
                                     stroke="#00ff88"
                                     strokeWidth={3}
                                     dot={{ r: 4, stroke: '#00ff88', strokeWidth: 2, fill: '#0d0d0d' }}
                                     activeDot={{ r: 6 }}
+                                    name="Pemasukan"
+                                />
+
+                                {/* Garis Merah: Expense */}
+                                <Line
+                                    type="monotone"
+                                    dataKey="expense"
+                                    stroke="#ff4d4d"
+                                    strokeWidth={3}
+                                    dot={{ r: 4, stroke: '#ff4d4d', strokeWidth: 2, fill: '#0d0d0d' }}
+                                    activeDot={{ r: 6 }}
+                                    name="Pengeluaran"
                                 />
                             </LineChart>
                         </ResponsiveContainer>
+
                     </div>
                 </div>
 
