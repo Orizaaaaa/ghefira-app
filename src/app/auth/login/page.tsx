@@ -129,8 +129,6 @@ const Login = () => {
                     <ButtonPrimary typeButon={"submit"} className={`rounded-lg w-full mb-3 font-medium py-2 flex justify-center items-center`}>
                         {loading ? <Spinner className={`w-5 h-5`} size="sm" color="white" /> : 'Masuk'}
                     </ButtonPrimary>
-                    <p className='text-sm'>Belum punya akun ? <Link className='text-primary font-medium ' href={'/auth/register'} > Daftar</Link></p>
-
                 </form>
             </div>
 
