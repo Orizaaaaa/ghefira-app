@@ -165,12 +165,13 @@ const page = (props: Props) => {
 
     return (
         <DefaultLayout>
-            <div className="flex justify-between items-center mb-5">
-                <ButtonSecondary className='p-3 rounded-xl flex justify-center items-center gap-2 text-primaryGreen' onClick={onOpen} >
+            <div className=" block md:flex justify-between items-center mb-5">
+                <ButtonSecondary className='w-full md:w-auto p-3 rounded-xl flex justify-center items-center gap-2 text-primaryGreen' onClick={onOpen} >
                     <LuDatabase color='#5E936C' size={24} />
                     Tambah Dataset
                 </ButtonSecondary>
-                <div className="flex  gap-5">
+
+                <div className="flex justify-center items-center  md:justify-center gap-5 mt-5 md:mt-0">
                     <div onClick={handleTrainDataset} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
                         <FaBrain color='#5E936C' size={24} />
                     </div>
