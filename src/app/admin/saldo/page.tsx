@@ -58,7 +58,7 @@ const page = (props: Props) => {
     const percentage = Math.round((current / total) * 100);
 
     const [currentPage, setCurrentPage] = useState(1);
-    const rowsPerPage = 4;
+    const rowsPerPage = 10;
     const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
     const [saldoData, setSaldoData] = useState<Saldo[]>([]);
 

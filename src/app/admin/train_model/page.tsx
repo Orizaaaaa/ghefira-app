@@ -157,6 +157,9 @@ const page = (props: Props) => {
         }
     };
 
+    useEffect(() => {
+        handleStatusModel();
+    }, []);
     console.log(category);
     console.log(form);
 
@@ -245,7 +248,7 @@ const page = (props: Props) => {
                 <h1 className="text-2xl font-bold mb-4" >Latih Model</h1>
                 <div className="flex gap-4">
                     <div className="">
-                        <h1>Pilih Saldo</h1>
+                        <h1>Pilih Kategori</h1>
                         <Autocomplete
                             className="w-full"
                             variant='bordered'
