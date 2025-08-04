@@ -160,6 +160,8 @@ const page = (props: Props) => {
     console.log(category);
     console.log(form);
 
+    console.log(responseModel);
+
 
     return (
         <DefaultLayout>
@@ -173,29 +175,70 @@ const page = (props: Props) => {
                         <FaBrain color='#5E936C' size={24} />
                     </div>
                     <div onClick={handleStatusModel} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
-                        <FaInfoCircle color='#5E936C' size={24} />
+                        <FaInfoCircle color='#FEA405' size={24} />
                     </div>
                     <div onClick={handleResetModel} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
-                        <MdRestartAlt color='#5E936C' size={24} />
+                        <MdRestartAlt color='red' size={26} />
                     </div>
                 </div>
             </div>
 
 
 
-            <div className="min-h-[400px]  p-4 border-2 border-gray-300 rounded-xl" >
-                {responseModel && (
-                    <div className="space-y-2">
-                        <h1>desain nya belum kepikiran hhehhee 🐷</h1>
-                        <p>Status: {responseModel.isModelReady ? 'Siap' : 'Belum siap'}</p>
-                        <p>Terakhir Training: {responseModel.lastTrainingDate}</p>
-                        <p>Path Model: {responseModel.modelPath}</p>
-                        <p>Model Ada: {responseModel.modelExists ? 'Ya' : 'Tidak'}</p>
-                        <p>Backup Ada: {responseModel.backupExists ? 'Ya' : 'Tidak'}</p>
-                        <p>Classifier Info: {JSON.stringify(responseModel.classifierInfo)}</p>
+            <div className="min-h-[400px] p-6 bg-white border-2 border-gray-200 rounded-xl shadow-md">
+                {responseModel ? (
+                    <div className="space-y-4">
+                        <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
+                            🧠 Status Model Machine Learning
+                        </h2>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
+                                <p className="text-sm text-gray-500">Status Model</p>
+                                <p className={`text-lg font-semibold ${responseModel.isModelReady ? 'text-green-600' : 'text-red-600'}`}>
+                                    {responseModel.isModelReady ? '✅ Siap digunakan' : '❌ Belum siap'}
+                                </p>
+                            </div>
+
+                            <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
+                                <p className="text-sm text-gray-500 mb-2">Terakhir Training</p>
+                                <p className="text-lg font-medium text-gray-700">{responseModel.lastTrainingDate}</p>
+                            </div>
+
+                            <div className="bg-gray-50 p-4 rounded-lg shadow-sm col-span-1 md:col-span-2">
+                                <p className="text-sm text-gray-500 mb-2">Path Model</p>
+                                <p className="text-sm font-mono break-all text-blue-700">{responseModel.modelPath}</p>
+                            </div>
+
+                            <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
+                                <p className="text-sm text-gray-500 mb-2">Model Tersedia</p>
+                                <span className={`inline-block px-3 py-1 text-sm rounded-full font-medium ${responseModel.modelExists ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                    {responseModel.modelExists ? 'Ya' : 'Tidak'}
+                                </span>
+                            </div>
+
+                            <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
+                                <p className="text-sm text-gray-500 mb-2">Backup Tersedia</p>
+                                <span className={`inline-block px-3 py-1 text-sm rounded-full font-medium ${responseModel.backupExists ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                    {responseModel.backupExists ? 'Ya' : 'Tidak'}
+                                </span>
+                            </div>
+
+                            <div className="bg-gray-50 p-4 rounded-lg shadow-sm col-span-1 md:col-span-2">
+                                <p className="text-sm text-gray-500 mb-1">Classifier Info</p>
+                                <pre className="bg-gray-100 text-sm p-3 rounded-lg overflow-x-auto text-gray-800">
+                                    {JSON.stringify(responseModel.classifierInfo, null, 2)}
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="text-center text-gray-400 italic">
+                        Data model belum tersedia 💤
                     </div>
                 )}
             </div>
+
 
             <ModalDefault isOpen={isOpen} onClose={onClose}>
                 <h1 className="text-2xl font-bold mb-4" >Latih Model</h1>
