@@ -54,8 +54,8 @@ function Page() {
 
     return (
         <DefaultLayout>
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-                <div className="md:col-span-4">
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-0 md:gap-6">
+                <div className="md:col-span-4 ">
                     <div className="relative bg-primaryGreen w-full p-3 rounded-xl overflow-hidden">
                         {/* Decorative Circles */}
                         <div className="absolute -top-10 -left-10 w-32 h-32 bg-white/35 opacity-30 rounded-full z-0"></div>
