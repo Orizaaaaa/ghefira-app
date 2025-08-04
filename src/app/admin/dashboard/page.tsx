@@ -1,14 +1,16 @@
 'use client';
 
-import { getSummaryPerMounth } from '@/api/method';
+import { getSumaryMounth, getSummaryPerMounth } from '@/api/method';
 import { man } from '@/app/image';
 import DefaultLayout from '@/components/layouts/DefaultLayout';
+import { formatRupiah } from '@/utils/helper';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
 import { FaMoneyBillTransfer } from 'react-icons/fa6';
 import { ImBook } from 'react-icons/im';
 import { IoPeople } from 'react-icons/io5';
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { log } from 'util';
 
 type Row = {
     key: string;
@@ -32,6 +34,7 @@ function Page() {
     const [jumlahBuku, setJumlahBuku] = useState(0);
     const [totalDenda, setTotalDenda] = useState(0);
     const [cart, setCart] = useState([])
+    const [monthlyData, setMonthlyData] = useState({} as any);
 
     const data = [
         { date: 'May 15', value: 100 },
@@ -55,7 +58,13 @@ function Page() {
 
     const fetchData = async () => {
         try {
-            await getSummaryPerMounth(2025, (res: any) => {
+            const now = new Date();
+            const currentMonth = now.getMonth() + 1;
+            const currentYear = now.getFullYear();
+
+            // Fetch data tahunan
+            // ambil tahun sekarang
+            await getSummaryPerMounth(currentYear, (res: any) => {
                 const income = res.data.income;
                 const expense = res.data.expense;
 
@@ -67,10 +76,17 @@ function Page() {
 
                 setCart(merged); // <== data ini dipakai untuk chart
             });
+
+            // Fetch data bulanan
+            await getSumaryMounth(currentMonth, currentYear, (res: any) => {
+                setMonthlyData(res); // <-- data bulanan, bisa untuk card ringkasan
+            });
+
         } catch (error) {
             console.error('Error fetching data:', error);
         }
     };
+
 
 
 
@@ -79,6 +95,7 @@ function Page() {
     }, []);
 
     console.log(cart);
+    console.log(monthlyData);
 
     return (
         <DefaultLayout>
@@ -161,8 +178,7 @@ function Page() {
                             <div>
                                 <p className="text-sm font-medium text-emerald-100">Total Saldo Masuk</p>
                                 <div className="flex items-end gap-2 mt-2">
-                                    <h2 className="text-4xl font-bold">${current}</h2>
-                                    <p className="text-lg text-emerald-100 mb-1">/ {total}</p>
+                                    <h2 className="text-4xl font-bold">{formatRupiah(monthlyData?.income)}</h2>
                                 </div>
                             </div>
                             <div className="bg-white/20 rounded-full p-2 group-hover:bg-white/30 transition-all">
@@ -201,7 +217,7 @@ function Page() {
                                         <span>9%</span>
                                     </div>
                                 </div>
-                                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">$11,239.00</h2>
+                                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">{formatRupiah(monthlyData?.expense)}</h2>
                             </div>
                             <div className="flex justify-end sm:block">
                                 <div className="bg-white/10 p-1 md:p-2 rounded-lg w-fit">

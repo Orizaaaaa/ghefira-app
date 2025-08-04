@@ -1,12 +1,14 @@
 'use client'
-import { createSaldo, deleteSaldo, getAllSaldo, updateSaldo } from '@/api/method'
+import { createSaldo, deleteSaldo, getAllSaldo, getSumaryMounth, updateSaldo } from '@/api/method'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import InputForm from '@/components/elements/input/InputForm'
 import ModalDefault from '@/components/fragments/modal/modal'
 import ModalAlert from '@/components/fragments/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
+import { formatRupiah } from '@/utils/helper'
 import { getKeyValue, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@heroui/react'
+import { m } from 'framer-motion'
 import { s } from 'framer-motion/client'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
@@ -50,7 +52,7 @@ const page = (props: Props) => {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isOpenUpdate, onOpen: onOpenUpdate, onClose: onCloseUpdate } = useDisclosure();
     const { isOpen: isOpenDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
-
+    const [monthlyData, setMonthlyData] = useState({} as any);
     const total = 16234;
     const current = 8445.98;
     const percentage = Math.round((current / total) * 100);
@@ -86,8 +88,15 @@ const page = (props: Props) => {
 
     const fetchData = async () => {
         setLoading(true);
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1;
+        const currentYear = now.getFullYear();
         try {
             const result = await getAllSaldo();
+            const resultDate = await getSumaryMounth(currentMonth, currentYear, (res: any) => {
+                setMonthlyData(res); // <-- data bulanan, bisa untuk card ringkasan
+            });
+            console.log(resultDate);
             setApiResponse(result);
             setSaldoData(result.data);
         } catch (error) {
@@ -185,6 +194,7 @@ const page = (props: Props) => {
         }
     }
 
+    console.log(monthlyData);
 
     return (
         <DefaultLayout>
@@ -198,7 +208,7 @@ const page = (props: Props) => {
                         <div>
                             <p className="text-sm font-medium text-emerald-100">Total Saldo Masuk</p>
                             <div className="flex items-end gap-2 mt-2">
-                                <h2 className="text-4xl font-bold">${current}</h2>
+                                <h2 className="text-4xl font-bold">{formatRupiah(monthlyData?.income)}</h2>
                                 <p className="text-lg text-emerald-100 mb-1">/ {total}</p>
                             </div>
                         </div>
@@ -238,7 +248,7 @@ const page = (props: Props) => {
                                     <span>9%</span>
                                 </div>
                             </div>
-                            <h2 className="text-4xl font-bold mt-2">$11,239.00</h2>
+                            <h2 className="text-4xl font-bold mt-2">{formatRupiah(monthlyData?.expense)}</h2>
                         </div>
                         <div className="bg-white/20 rounded-full p-2 group-hover:bg-white/30 transition-all">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
