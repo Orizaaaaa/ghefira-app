@@ -285,19 +285,21 @@ const CategoryPage = () => {
                 <h1 className="text-2xl font-semibold mb-4" >Tambah Kategori</h1>
                 <div className="space-y-4">
                     <InputForm
+                        styleTitle='mb-2'
                         htmlFor="name"
                         title="Nama Kategori"
                         type="text"
-                        className="bg-slate-100 rounded-md"
+                        className="bg-slate-100 rounded-md mb-3"
                         onChange={handleChange}
                         value={form.name}
                     />
 
                     <InputForm
+                        styleTitle='mb-2'
                         htmlFor="description"
                         title="Deskripsi"
                         type="text"
-                        className="bg-slate-100 rounded-md"
+                        className="bg-slate-100 rounded-md mb-3"
                         onChange={handleChange}
                         value={form.description}
                     />
