@@ -120,6 +120,15 @@ export const getStatusModel = async (callback: any) => {
         });
 }
 
+export const trainDataset = async (callback: any) => {
+    await axiosInterceptor.post('/transaction/train-model')
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            console.log(err);
+        });
+}
+
 // CAPSTER
 export const getAllCapster = async () => {
     try {

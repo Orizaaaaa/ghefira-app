@@ -1,5 +1,5 @@
 'use client'
-import { createTransactionTrainModel, getAllCategory, getAllSaldo, getStatusModel, resetModels } from '@/api/method'
+import { createTransactionTrainModel, getAllCategory, getAllSaldo, getStatusModel, resetModels, trainDataset } from '@/api/method'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import InputForm from '@/components/elements/input/InputForm'
@@ -143,6 +143,18 @@ const page = (props: Props) => {
         }
     }
 
+    const handleTrainDataset = async () => {
+        const loadingToast = toast.loading('Sedang melatih dataset...');
+        try {
+            await trainDataset((res: any) => {
+                toast.success('Dataset berhasil dilatih!', { id: loadingToast });
+                console.log(res);
+            });
+        } catch (error) {
+            console.error(error);
+            toast.error('Gagal melatih dataset!', { id: loadingToast });
+        }
+    };
 
     console.log(category);
     console.log(form);
@@ -153,7 +165,7 @@ const page = (props: Props) => {
             <div className="flex justify-end mb-4 gap-3">
                 <ButtonSecondary className="py-2 px-4 rounded-lg flex items-center gap-2" onClick={onOpen}>
                     <FaBrain />
-                    Latih model
+                    Masukan dataset
                 </ButtonSecondary>
                 <ButtonSecondary onClick={handleResetModel} className="py-2 px-4 rounded-lg flex items-center gap-2">
                     <MdRestartAlt />
@@ -162,6 +174,10 @@ const page = (props: Props) => {
                 <ButtonSecondary onClick={handleStatusModel} className="py-2 px-4 rounded-lg flex items-center gap-2">
                     <FaInfoCircle />
                     Status Model
+                </ButtonSecondary>
+                <ButtonSecondary onClick={handleTrainDataset} className="py-2 px-4 rounded-lg flex items-center gap-2">
+                    <FaInfoCircle />
+                    Latih dataset
                 </ButtonSecondary>
             </div>
 
