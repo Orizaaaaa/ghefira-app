@@ -384,9 +384,14 @@ const page = (props: Props) => {
                 )}
             </div>
 
+            <h1 className="text-2xl font-bold  mt-11 mb-3 inline-block italic text-primaryGreen">
+                📂 List Dataset
+            </h1>
+
+
             <Table
                 isCompact
-                className='mt-5'
+                className=''
                 aria-label="Tabel Transaksi"
                 bottomContent={
                     <div className="flex w-full justify-between items-center">
