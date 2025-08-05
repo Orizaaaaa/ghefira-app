@@ -1,5 +1,5 @@
 'use client'
-import { deleteCategory, getAllCategory, updateCategory } from '@/api/method'
+import { createCategory, deleteCategory, getAllCategory, updateCategory } from '@/api/method'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import InputForm from '@/components/elements/input/InputForm'
@@ -104,13 +104,6 @@ const CategoryPage = () => {
         onOpenDelete();
     };
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('id-ID', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    };
 
     const type = [
         { label: "Pendapatan", key: "income" },
@@ -135,6 +128,13 @@ const CategoryPage = () => {
 
 
     const handleUpdate = async () => {
+        const { name, type, description } = formUpdate;
+
+        if (!name || !type || !description) {
+            toast.error('Semua data harus diisi!');
+            return;
+        }
+
         const toastId = toast.loading('Memperbarui kategori...');
         try {
             await updateCategory(id, formUpdate, (result: any) => {
@@ -147,6 +147,7 @@ const CategoryPage = () => {
             toast.error('Gagal memperbarui kategori', { id: toastId });
         }
     };
+
 
     const handleDelete = async () => {
         const toastId = toast.loading('Menghapus kategori...');
@@ -161,6 +162,28 @@ const CategoryPage = () => {
             toast.error('Gagal menghapus kategori', { id: toastId });
         }
     };
+
+    const handleCreate = async () => {
+        const { name, type, description } = form;
+
+        if (!name || !type || !description) {
+            toast.error('Semua data harus diisi!');
+            return;
+        }
+
+        const toastId = toast.loading('Menambah kategori...');
+        try {
+            await createCategory(form, (result: any) => {
+                toast.success('Kategori berhasil ditambahkan!', { id: toastId });
+                fetchData();
+                onClose();
+            });
+        } catch (error) {
+            console.error(error);
+            toast.error('Gagal menambah kategori', { id: toastId });
+        }
+    };
+
 
 
     return (
@@ -326,7 +349,7 @@ const CategoryPage = () => {
                     <ButtonSecondary className="py-1 px-2 rounded-xl" onClick={onClose}>
                         Batal
                     </ButtonSecondary>
-                    <ButtonPrimary className="py-1 px-2 rounded-xl" >
+                    <ButtonPrimary className="py-1 px-2 rounded-xl" onClick={handleCreate} >
                         Simpan
                     </ButtonPrimary>
                 </div>
