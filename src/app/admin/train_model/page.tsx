@@ -176,7 +176,7 @@ const page = (props: Props) => {
         setForm(prev => ({ ...prev, [field]: key }));
     };
 
-    const handleSelectionChangeUpdate = (key: string | null, field: 'saldo' | 'type') => {
+    const handleSelectionChangeUpdate = (key: string | null, field: 'saldo' | 'type' | 'category') => {
         if (!key) return;
         setFormUpdate(prev => ({ ...prev, [field]: key }));
     };
@@ -207,7 +207,7 @@ const page = (props: Props) => {
                     description: '',
                     type: ''
                 });
-
+                fetchData();
                 const id = localStorage.getItem('id');
                 if (id) {
                     setForm(prev => ({ ...prev, user: id }));
@@ -221,6 +221,7 @@ const page = (props: Props) => {
             toast.error('Gagal menyimpan data!', { id: loadingToast });
         }
     };
+
 
     const handleResetModel = async () => {
         const loadingToast = toast.loading('Sedang mereset model...');
@@ -254,6 +255,7 @@ const page = (props: Props) => {
             await trainDataset((res: any) => {
                 toast.success('Dataset berhasil dilatih!', { id: loadingToast });
                 console.log(res);
+
             });
         } catch (error) {
             console.error(error);
@@ -275,6 +277,13 @@ const page = (props: Props) => {
     };
 
     const handleEditTransaction = async () => {
+        const { user, saldo, amount, description, type, category } = formUpdate;
+
+        if (!user || !saldo || !amount || !description || !type || !category) {
+            toast.error('Semua data harus diisi!');
+            return;
+        }
+
         const toastId = toast.loading('Mengubah transaksi...');
         try {
             await updateTransaction(id, formUpdate, (res: any) => {
@@ -288,6 +297,7 @@ const page = (props: Props) => {
             toast.error('Gagal mengubah transaksi.', { id: toastId });
         }
     };
+
 
     // ===========================
     // Debugging Logs
@@ -610,7 +620,7 @@ const page = (props: Props) => {
                     <Autocomplete
                         className="w-full"
                         variant='bordered'
-                        onSelectionChange={(e: any) => handleSelectionChange(e, 'category')}
+                        onSelectionChange={(e: any) => handleSelectionChangeUpdate(e, 'category')}
                         value={form.category}
                         selectedKey={formUpdate.category}
                     >

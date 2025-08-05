@@ -178,8 +178,14 @@ const Page = (props: Props) => {
         { label: "Pendapatan", key: "income" },
         { label: "Pengeluaran", key: "expense" },
     ];
-
     const handleCreateTransaction = async () => {
+        const { user, saldo, amount, description, type } = form;
+
+        if (!user || !saldo || !amount || !description || !type) {
+            toast.error('Semua data harus diisi!');
+            return;
+        }
+
         const toastId = toast.loading('Menyimpan transaksi...');
         try {
             await createTransactionModel(form, (res: any) => {
@@ -193,6 +199,7 @@ const Page = (props: Props) => {
             toast.error('Gagal membuat transaksi.', { id: toastId });
         }
     };
+
 
     const handleDelete = async () => {
         const toastId = toast.loading('Menghapus transaksi...');
@@ -209,6 +216,13 @@ const Page = (props: Props) => {
 
 
     const handleEditTransaction = async () => {
+        const { user, saldo, amount, description, type } = formUpdate;
+
+        if (!user || !saldo || !amount || !description || !type) {
+            toast.error('Semua data harus diisi!');
+            return;
+        }
+
         const toastId = toast.loading('Mengubah transaksi...');
         try {
             await updateTransaction(id, formUpdate, (res: any) => {
@@ -221,8 +235,7 @@ const Page = (props: Props) => {
             console.error(error);
             toast.error('Gagal mengubah transaksi.', { id: toastId });
         }
-    }
-
+    };
     let totalExpense = 0;
     let totalIncome = 0;
 
