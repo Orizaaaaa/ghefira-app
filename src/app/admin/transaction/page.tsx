@@ -237,6 +237,7 @@ const Page = (props: Props) => {
     console.log('transaksi', transaction?.data);
     console.log('saldo', saldo);
     console.log('category', category.length);
+    console.log('id', id);
 
 
 
