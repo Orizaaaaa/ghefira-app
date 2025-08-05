@@ -141,8 +141,12 @@ const page = (props: Props) => {
     }
 
     const handleCreateSaldo = async () => {
-        const loadingToast = toast.loading('Menyimpan data saldo...');
+        if (!form.name || !form.amount || !form.description) {
+            toast.error('Semua field harus diisi!');
+            return;
+        }
 
+        const loadingToast = toast.loading('Menyimpan data saldo...');
         try {
             await createSaldo(form, (res: any) => {
                 toast.success('Saldo berhasil ditambahkan', { id: loadingToast });
@@ -162,6 +166,11 @@ const page = (props: Props) => {
     };
 
     const handleEditSaldo = async () => {
+        if (!formUpdate.name || !formUpdate.amount || !formUpdate.description) {
+            toast.error('Semua field harus diisi!');
+            return;
+        }
+
         const loadingToast = toast.loading('Mengubah data saldo...');
         try {
             await updateSaldo(id, formUpdate, (res: any) => {
@@ -180,6 +189,7 @@ const page = (props: Props) => {
             toast.error('Gagal mengubah saldo', { id: loadingToast });
         }
     };
+
 
     const handleDeleteSaldo = async () => {
         const loadingToast = toast.loading('Menghapus data saldo...');
