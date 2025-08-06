@@ -47,9 +47,10 @@ function Page() {
         { date: 'Juli 15', value: 100 },
     ];
 
-    const total = 16234;
-    const current = 8445.98;
-    const percentage = Math.round((current / total) * 100);
+    const target = 10_000_000;
+    const current = monthlyData?.income ?? 0;
+    const percentage = Math.round((current / target) * 100);
+
 
 
     const dataSideChart = Array.from({ length: 30 }, () => ({
@@ -190,7 +191,7 @@ function Page() {
 
                         <div className="mt-6">
                             <div className="flex justify-between items-center mb-2">
-                                <span className="text-sm font-medium text-emerald-100">Progress</span>
+                                <span className="text-sm font-medium text-emerald-100">Target</span>
                                 <span className="text-sm font-bold">{percentage}%</span>
                             </div>
                             <div className="relative pt-1">
