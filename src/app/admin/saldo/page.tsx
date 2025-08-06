@@ -53,9 +53,9 @@ const page = (props: Props) => {
     const { isOpen: isOpenUpdate, onOpen: onOpenUpdate, onClose: onCloseUpdate } = useDisclosure();
     const { isOpen: isOpenDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
     const [monthlyData, setMonthlyData] = useState({} as any);
-    const total = 16234;
-    const current = 8445.98;
-    const percentage = Math.round((current / total) * 100);
+    const target = 10_000_000;
+    const current = monthlyData?.income ?? 0;
+    const percentage = Math.round((current / target) * 100);
 
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
@@ -219,7 +219,6 @@ const page = (props: Props) => {
                             <p className="text-sm font-medium text-emerald-100">Total Saldo Masuk</p>
                             <div className="flex items-end gap-2 mt-2">
                                 <h2 className="text-4xl font-bold">{formatRupiah(monthlyData?.income)}</h2>
-                                <p className="text-lg text-emerald-100 mb-1">/ {total}</p>
                             </div>
                         </div>
                         <div className="bg-white/20 rounded-full p-2 group-hover:bg-white/30 transition-all">
@@ -231,7 +230,7 @@ const page = (props: Props) => {
 
                     <div className="mt-6">
                         <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm font-medium text-emerald-100">Progress</span>
+                            <span className="text-sm font-medium text-emerald-100">Target</span>
                             <span className="text-sm font-bold">{percentage}%</span>
                         </div>
                         <div className="relative pt-1">
