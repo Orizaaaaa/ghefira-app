@@ -131,7 +131,12 @@ const page = (props: Props) => {
             const resultSaldo = await getAllSaldo();
             const result = await getAllCategory();
             const resultTransaction = await getAllTransaction();
+            const dataStatusModel = await getStatusModel((res: any) => {
+                console.log(res);
+                setResponseModel(res.data);
+            });
 
+            console.log(dataStatusModel);
             setTransaction(resultTransaction);
             setSaldo(resultSaldo.data);
             setCategory(result.data);
@@ -148,9 +153,6 @@ const page = (props: Props) => {
         fetchData();
     }, []);
 
-    useEffect(() => {
-        handleStatusModel();
-    }, []);
 
     // ===========================
     // Selection Options
