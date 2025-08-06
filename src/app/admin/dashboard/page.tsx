@@ -128,7 +128,7 @@ function Page() {
 
 
 
-                    <div className="p-4 rounded-xl shadow-lg w-full h-[300px] mt-5">
+                    <div className="p-4 rounded-xl shadow-lg w-full h-[300px] mt-10">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={cart}>
                                 <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#eee" />
@@ -189,8 +189,8 @@ function Page() {
                     </div>
                 </div>
 
-                <div className="col-span-2 space-y-4 md:space-y-6">
-                    <div className="bg-gradient-to-r from-green-400 to-emerald-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300  flex flex-col group">
+                <div className="col-span-2 gap-7 mt-7 md:mt-0 md:gap-0 flex flex-col items-stretch justify-between">
+                    <div className="h-[240px] bg-gradient-to-r from-green-400 to-emerald-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300  flex flex-col group">
                         <div className="flex justify-between items-start">
                             <div>
                                 <p className="text-sm font-medium text-emerald-100">Total Saldo Masuk</p>
@@ -222,30 +222,33 @@ function Page() {
                     </div>
 
                     {/* Saldo Keluar Card - Responsive */}
-                    <div className="bg-gradient-to-r from-rose-500 to-pink-600 rounded-2xl p-4 md:p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 group">
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-3 md:mb-4">
-                            <div className="flex-1">
-                                <div className="flex flex-wrap items-center gap-2 mb-1">
-                                    <p className="text-xs md:text-sm font-medium text-rose-100">Total Saldo Keluar</p>
-                                    <div className="text-xs px-2 py-1 bg-white/20 rounded-full flex items-center gap-1 w-fit">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-                                        </svg>
-                                        <span>9%</span>
+                    <div className="h-[240px] bg-gradient-to-r from-rose-500 to-pink-600 rounded-2xl p-4 md:p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 group flex flex-col justify-between">
+                        <div>
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-3 md:mb-4">
+                                <div className="flex-1">
+                                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                                        <p className="text-xs md:text-sm font-medium text-rose-100">Total Saldo Keluar</p>
+                                        <div className="text-xs px-2 py-1 bg-white/20 rounded-full flex items-center gap-1 w-fit">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                                            </svg>
+                                            <span>9%</span>
+                                        </div>
                                     </div>
+                                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">{formatRupiah(monthlyData?.expense)}</h2>
                                 </div>
-                                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">{formatRupiah(monthlyData?.expense)}</h2>
-                            </div>
-                            <div className="flex justify-end sm:block">
-                                <div className="bg-white/10 p-1 md:p-2 rounded-lg w-fit">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
+                                <div className="flex justify-end sm:block">
+                                    <div className="bg-white/10 p-1 md:p-2 rounded-lg w-fit">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="mt-1 md:mt-2">
+                        {/* Chart Paling Bawah */}
+                        <div className="w-full">
                             <ResponsiveContainer width="100%" height={60}>
                                 <BarChart data={dataSideChart}>
                                     <defs>
@@ -265,6 +268,7 @@ function Page() {
                             </ResponsiveContainer>
                         </div>
                     </div>
+
                 </div>
             </div>
 
