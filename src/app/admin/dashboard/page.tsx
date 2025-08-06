@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { FaMoneyBillTransfer } from 'react-icons/fa6';
 import { ImBook } from 'react-icons/im';
 import { IoPeople } from 'react-icons/io5';
-import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { log } from 'util';
 
 type Row = {
@@ -130,14 +130,14 @@ function Page() {
 
                     <div className="p-4 rounded-xl shadow-lg w-full h-[300px] mt-5">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={cart}>
-                                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#1a1a1a" />
+                            <AreaChart data={cart}>
+                                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#eee" />
                                 <XAxis dataKey="date" stroke="#666" />
                                 <YAxis hide />
                                 <Tooltip
                                     contentStyle={{ backgroundColor: '#222', border: 'none' }}
                                     labelStyle={{ color: '#fff' }}
-                                    cursor={{ stroke: '#00ff88', strokeWidth: 1 }}
+                                    cursor={{ stroke: '#8884d8', strokeWidth: 1 }}
                                     formatter={(value: any) =>
                                         new Intl.NumberFormat('id-ID', {
                                             style: 'currency',
@@ -146,29 +146,45 @@ function Page() {
                                         }).format(value)
                                     }
                                 />
-                                {/* Garis Hijau: Income */}
-                                <Line
+
+                                {/* Area Hijau */}
+                                <Area
                                     type="monotone"
                                     dataKey="income"
-                                    stroke="#00ff88"
+                                    stroke="#22c55e"
                                     strokeWidth={3}
-                                    dot={{ r: 4, stroke: '#00ff88', strokeWidth: 2, fill: '#0d0d0d' }}
-                                    activeDot={{ r: 6 }}
+                                    fill="url(#colorIncome)"
+                                    dot={{ r: 0 }}
+                                    activeDot={{ r: 4 }}
                                     name="Pemasukan"
                                 />
 
-                                {/* Garis Merah: Expense */}
-                                <Line
+                                {/* Area Biru */}
+                                <Area
                                     type="monotone"
                                     dataKey="expense"
-                                    stroke="#ff4d4d"
+                                    stroke="#FB4141"
                                     strokeWidth={3}
-                                    dot={{ r: 4, stroke: '#ff4d4d', strokeWidth: 2, fill: '#0d0d0d' }}
-                                    activeDot={{ r: 6 }}
+                                    fill="url(#colorExpense)"
+                                    dot={{ r: 0 }}
+                                    activeDot={{ r: 4 }}
                                     name="Pengeluaran"
                                 />
-                            </LineChart>
+
+                                {/* Gradient Fill */}
+                                <defs>
+                                    <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#22c55e" stopOpacity={0.3} />
+                                        <stop offset="100%" stopColor="#22c55e" stopOpacity={0} />
+                                    </linearGradient>
+                                    <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#FB4141" stopOpacity={0.3} />
+                                        <stop offset="100%" stopColor="#FB4141" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                            </AreaChart>
                         </ResponsiveContainer>
+
 
                     </div>
                 </div>
