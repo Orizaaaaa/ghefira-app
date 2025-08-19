@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { HeroUIProvider } from "@heroui/react";
 import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "@/hook/AuthContext";
 
 
 
@@ -38,7 +39,7 @@ export default function RootLayout({
         suppressHydrationWarning={true}
       >
         <HeroUIProvider >
-          {children}
+          <AuthProvider>{children}</AuthProvider>
           <Toaster position="top-center"
             reverseOrder={false} />
         </HeroUIProvider>

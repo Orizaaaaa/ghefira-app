@@ -6,6 +6,7 @@ import InputForm from '@/components/elements/input/InputForm'
 import ModalDefault from '@/components/fragments/modal/modal'
 import ModalAlert from '@/components/fragments/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
+import { useAuth } from '@/hook/AuthContext'
 import { formatRupiah } from '@/utils/helper'
 import { getKeyValue, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@heroui/react'
 import { m } from 'framer-motion'
@@ -47,6 +48,8 @@ interface ApiResponse {
 }
 
 const page = (props: Props) => {
+    const { role } = useAuth();
+    console.log('haji ieu role', role);
     const [id, setId] = useState('');
     const [loading, setLoading] = useState(false);
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -208,7 +211,7 @@ const page = (props: Props) => {
 
     return (
         <DefaultLayout>
-            <div className=" flex justify-end mb-4 gap-3">
+            <div className={` flex justify-end mb-4 gap-3 ${role !== 'user' && 'hidden'}`}>
                 <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={openModalCreate}> + Tambah Saldo </ButtonSecondary>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
