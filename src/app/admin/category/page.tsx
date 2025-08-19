@@ -6,6 +6,7 @@ import InputForm from '@/components/elements/input/InputForm'
 import ModalDefault from '@/components/fragments/modal/modal'
 import ModalAlert from '@/components/fragments/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
+import { useAuth } from '@/hook/AuthContext'
 import { formatDateWithDays } from '@/utils/helper'
 import { Autocomplete, AutocompleteItem, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@heroui/react'
 import React, { useEffect, useState, useMemo } from 'react'
@@ -26,6 +27,7 @@ type Category = {
 };
 
 const CategoryPage = () => {
+    const { role } = useAuth();
     const [id, setId] = useState('');
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(false);
@@ -189,7 +191,7 @@ const CategoryPage = () => {
     return (
         <DefaultLayout>
             <div className="flex justify-end mb-4 gap-3">
-                <ButtonSecondary className='py-2 px-4 rounded-lg' onClick={handleOpenCreate}>
+                <ButtonSecondary className={`py-2 px-4 rounded-lg   ${role !== 'user' && 'hidden'} `} onClick={handleOpenCreate}>
                     + Tambah Kategori
                 </ButtonSecondary>
             </div>
@@ -233,77 +235,135 @@ const CategoryPage = () => {
 
             {/* Category Table */}
             <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                <Table
-                    aria-label="Daftar Kategori"
-                    isStriped
-                    classNames={{
-                        wrapper: "min-h-[250px]",
-                        th: 'bg-secondaryGreen text-white font-semibold',
-                        td: 'text-black',
-                    }}
-                    bottomContent={
-                        pages > 1 && (
-                            <div className="flex w-full justify-center py-4">
-                                <Pagination
-                                    isCompact
-                                    showControls
-                                    classNames={{
-                                        cursor: "bg-primaryGreen text-white cursor-pointer"
-                                    }}
-                                    color="primary"
-                                    page={page}
-                                    total={pages}
-                                    onChange={setPage}
-                                />
-                            </div>
-                        )
-                    }
-                >
-                    <TableHeader>
-                        <TableColumn>NAMA</TableColumn>
-                        <TableColumn>TIPE</TableColumn>
-                        <TableColumn>DESKRIPSI</TableColumn>
-                        <TableColumn>TANGGAL DIBUAT</TableColumn>
-                        <TableColumn>AKSI</TableColumn>
-                    </TableHeader>
-                    <TableBody
-                        items={items}
-                        isLoading={loading}
-                        loadingContent={<span>Memuat data...</span>}
+                {role !== 'user' ? (
+                    <Table
+                        aria-label="Daftar Kategori"
+                        isStriped
+                        classNames={{
+                            wrapper: "min-h-[250px]",
+                            th: 'bg-secondaryGreen text-white font-semibold',
+                            td: 'text-black',
+                        }}
+                        bottomContent={
+                            pages > 1 && (
+                                <div className="flex w-full justify-center py-4">
+                                    <Pagination
+                                        isCompact
+                                        showControls
+                                        classNames={{
+                                            cursor: "bg-primaryGreen text-white cursor-pointer"
+                                        }}
+                                        color="primary"
+                                        page={page}
+                                        total={pages}
+                                        onChange={setPage}
+                                    />
+                                </div>
+                            )
+                        }
                     >
-                        {(item) => (
-                            <TableRow key={item._id}>
-                                <TableCell>{item.name}</TableCell>
-                                <TableCell>
-                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.type === 'income'
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-red-100 text-red-800'
-                                        }`}>
-                                        {item.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
-                                    </span>
-                                </TableCell>
-                                <TableCell className="max-w-xs truncate">{item.description}</TableCell>
-                                <TableCell>{formatDateWithDays(item.createdAt)}</TableCell>
-                                <TableCell>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => handleOpenUpdate(item)}
-                                            className="text-blue-500 hover:text-blue-700"
-                                        >
-                                            <RiEdit2Fill size={20} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleOpenDelete(item._id)}
-                                            className="text-red-500 hover:text-red-700"
-                                        >
-                                            <IoMdTrash size={20} />
-                                        </button>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                        <TableHeader>
+                            <TableColumn>NAMA</TableColumn>
+                            <TableColumn>TIPE</TableColumn>
+                            <TableColumn>DESKRIPSI</TableColumn>
+                            <TableColumn>TANGGAL DIBUAT</TableColumn>
+                        </TableHeader>
+                        <TableBody
+                            items={items}
+                            isLoading={loading}
+                            loadingContent={<span>Memuat data...</span>}
+                        >
+                            {(item) => (
+                                <TableRow key={item._id}>
+                                    <TableCell>{item.name}</TableCell>
+                                    <TableCell>
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.type === 'income'
+                                            ? 'bg-green-100 text-green-800'
+                                            : 'bg-red-100 text-red-800'
+                                            }`}>
+                                            {item.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell className="max-w-xs truncate">{item.description}</TableCell>
+                                    <TableCell>{formatDateWithDays(item.createdAt)}</TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                ) : (
+                    <Table
+                        aria-label="Daftar Kategori"
+                        isStriped
+                        classNames={{
+                            wrapper: "min-h-[250px]",
+                            th: 'bg-secondaryGreen text-white font-semibold',
+                            td: 'text-black',
+                        }}
+                        bottomContent={
+                            pages > 1 && (
+                                <div className="flex w-full justify-center py-4">
+                                    <Pagination
+                                        isCompact
+                                        showControls
+                                        classNames={{
+                                            cursor: "bg-primaryGreen text-white cursor-pointer"
+                                        }}
+                                        color="primary"
+                                        page={page}
+                                        total={pages}
+                                        onChange={setPage}
+                                    />
+                                </div>
+                            )
+                        }
+                    >
+                        <TableHeader>
+                            <TableColumn>NAMA</TableColumn>
+                            <TableColumn>TIPE</TableColumn>
+                            <TableColumn>DESKRIPSI</TableColumn>
+                            <TableColumn>TANGGAL DIBUAT</TableColumn>
+                            <TableColumn>AKSI</TableColumn>
+                        </TableHeader>
+                        <TableBody
+                            items={items}
+                            isLoading={loading}
+                            loadingContent={<span>Memuat data...</span>}
+                        >
+                            {(item) => (
+                                <TableRow key={item._id}>
+                                    <TableCell>{item.name}</TableCell>
+                                    <TableCell>
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.type === 'income'
+                                            ? 'bg-green-100 text-green-800'
+                                            : 'bg-red-100 text-red-800'
+                                            }`}>
+                                            {item.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell className="max-w-xs truncate">{item.description}</TableCell>
+                                    <TableCell>{formatDateWithDays(item.createdAt)}</TableCell>
+                                    <TableCell>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => handleOpenUpdate(item)}
+                                                className="text-blue-500 hover:text-blue-700"
+                                            >
+                                                <RiEdit2Fill size={20} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleOpenDelete(item._id)}
+                                                className="text-red-500 hover:text-red-700"
+                                            >
+                                                <IoMdTrash size={20} />
+                                            </button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                )}
+
             </div>
 
             {/* Add Category Modal */}
