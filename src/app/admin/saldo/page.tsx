@@ -291,86 +291,142 @@ const page = (props: Props) => {
                 </div>
             </div>
 
-
-            <Table
-                isCompact
-                className='mt-5'
-                aria-label="Tabel Saldo"
-                bottomContent={
-                    totalPages > 1 && (
-                        <div className="flex w-full justify-center">
-                            <Pagination
-                                isCompact
-                                showControls
-                                showShadow
-                                classNames={{
-                                    cursor: "bg-primaryGreen text-white cursor-pointer"
-                                }}
-                                color="primary"
-                                page={currentPage}
-                                total={totalPages}
-                                onChange={setCurrentPage}
-                            />
-                        </div>
-                    )
-                }
-                classNames={{
-                    wrapper: "min-h-[250px]",
-                    th: 'bg-secondaryGreen text-white font-semibold',
-                    td: 'text-black',
-                }}
-            >
-                <TableHeader>
-                    <TableColumn key="name">NAMA</TableColumn>
-                    <TableColumn key="amount">JUMLAH</TableColumn>
-                    <TableColumn key="description">DESKRIPSI</TableColumn>
-                    <TableColumn key="createdAt">DIBUAT</TableColumn>
-                    <TableColumn key="updatedAt">DIPERBARUI</TableColumn>
-                    <TableColumn key="actions">AKSI</TableColumn>
-                </TableHeader>
-                <TableBody
-                    items={currentItems}
-                    isLoading={loading}
-                    loadingContent={<span>Memuat data...</span>}
+            {role !== 'user' ? (
+                <Table
+                    isCompact
+                    className='mt-5'
+                    aria-label="Tabel Saldo"
+                    bottomContent={
+                        totalPages > 1 && (
+                            <div className="flex w-full justify-center">
+                                <Pagination
+                                    isCompact
+                                    showControls
+                                    showShadow
+                                    classNames={{
+                                        cursor: "bg-primaryGreen text-white cursor-pointer"
+                                    }}
+                                    color="primary"
+                                    page={currentPage}
+                                    total={totalPages}
+                                    onChange={setCurrentPage}
+                                />
+                            </div>
+                        )
+                    }
+                    classNames={{
+                        wrapper: "min-h-[250px]",
+                        th: 'bg-secondaryGreen text-white font-semibold',
+                        td: 'text-black',
+                    }}
                 >
-                    {(item) => (
-                        <TableRow key={item._id}>
-                            <TableCell>{item.name}</TableCell>
-                            <TableCell>{formatCurrency(item.amount)}</TableCell>
-                            <TableCell>{item.description}</TableCell>
-                            <TableCell>{formatDate(item.createdAt)}</TableCell>
-                            <TableCell>{formatDate(item.updatedAt)}</TableCell>
-                            <TableCell>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => {
-                                            setId(item._id);
-                                            setFormUpdate({
-                                                name: item.name,
-                                                amount: item.amount,
-                                                description: item.description
-                                            });
-                                            onOpenUpdate();
+                    <TableHeader>
+                        <TableColumn key="name">NAMA</TableColumn>
+                        <TableColumn key="amount">JUMLAH</TableColumn>
+                        <TableColumn key="description">DESKRIPSI</TableColumn>
+                        <TableColumn key="createdAt">DIBUAT</TableColumn>
+                        <TableColumn key="updatedAt">DIPERBARUI</TableColumn>
+
+                    </TableHeader>
+                    <TableBody
+                        items={currentItems}
+                        isLoading={loading}
+                        loadingContent={<span>Memuat data...</span>}
+                    >
+                        {(item) => (
+                            <TableRow key={item._id}>
+                                <TableCell>{item.name}</TableCell>
+                                <TableCell>{formatCurrency(item.amount)}</TableCell>
+                                <TableCell>{item.description}</TableCell>
+                                <TableCell>{formatDate(item.createdAt)}</TableCell>
+                                <TableCell>{formatDate(item.updatedAt)}</TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            )
+                : (
+                    <Table
+                        isCompact
+                        className='mt-5'
+                        aria-label="Tabel Saldo"
+                        bottomContent={
+                            totalPages > 1 && (
+                                <div className="flex w-full justify-center">
+                                    <Pagination
+                                        isCompact
+                                        showControls
+                                        showShadow
+                                        classNames={{
+                                            cursor: "bg-primaryGreen text-white cursor-pointer"
                                         }}
-                                        className="text-blue-500 hover:text-blue-700"
-                                    >
-                                        <RiEdit2Fill size={20} />
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setId(item._id);
-                                            onOpenDelete();
-                                        }}
-                                        className="text-red-500 hover:text-red-700"
-                                    >
-                                        <IoMdTrash size={20} />
-                                    </button>
+                                        color="primary"
+                                        page={currentPage}
+                                        total={totalPages}
+                                        onChange={setCurrentPage}
+                                    />
                                 </div>
-                            </TableCell>
-                        </TableRow>
-                    )}
-                </TableBody>
-            </Table>
+                            )
+                        }
+                        classNames={{
+                            wrapper: "min-h-[250px]",
+                            th: 'bg-secondaryGreen text-white font-semibold',
+                            td: 'text-black',
+                        }}
+                    >
+                        <TableHeader>
+                            <TableColumn key="name">NAMA</TableColumn>
+                            <TableColumn key="amount">JUMLAH</TableColumn>
+                            <TableColumn key="description">DESKRIPSI</TableColumn>
+                            <TableColumn key="createdAt">DIBUAT</TableColumn>
+                            <TableColumn key="updatedAt">DIPERBARUI</TableColumn>
+                            <TableColumn key="actions">AKSI</TableColumn>
+                        </TableHeader>
+                        <TableBody
+                            items={currentItems}
+                            isLoading={loading}
+                            loadingContent={<span>Memuat data...</span>}
+                        >
+                            {(item) => (
+                                <TableRow key={item._id}>
+                                    <TableCell>{item.name}</TableCell>
+                                    <TableCell>{formatCurrency(item.amount)}</TableCell>
+                                    <TableCell>{item.description}</TableCell>
+                                    <TableCell>{formatDate(item.createdAt)}</TableCell>
+                                    <TableCell>{formatDate(item.updatedAt)}</TableCell>
+                                    <TableCell>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    setId(item._id);
+                                                    setFormUpdate({
+                                                        name: item.name,
+                                                        amount: item.amount,
+                                                        description: item.description
+                                                    });
+                                                    onOpenUpdate();
+                                                }}
+                                                className="text-blue-500 hover:text-blue-700"
+                                            >
+                                                <RiEdit2Fill size={20} />
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setId(item._id);
+                                                    onOpenDelete();
+                                                }}
+                                                className="text-red-500 hover:text-red-700"
+                                            >
+                                                <IoMdTrash size={20} />
+                                            </button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                )}
+
 
             <ModalDefault isOpen={isOpen} onClose={onClose} >
                 <h1 className='text-xl font-bold my-4'>Tambah Saldo</h1>

@@ -15,8 +15,11 @@ import { Spinner } from '@heroui/react';
 import { realLogo } from '../../image';
 import { loginUser } from '@/lib/firebase/firestore';
 import { loginService } from '@/api/method';
+import { useAuth } from '@/hook/AuthContext';
 
 const Login = () => {
+    const { setRole } = useAuth();
+
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(true);
     const [errorLogin, setErrorLogin] = useState('');
@@ -94,6 +97,7 @@ const Login = () => {
                 localStorage.setItem('role', res.data.user.role);
                 localStorage.setItem('token', res.data.token);
                 setLoading(false);
+                setRole(res.data.user.role);
                 setErrorMsg({ email: '', password: '' });
                 setErrorLogin('');
                 // Redirect berdasarkan role
