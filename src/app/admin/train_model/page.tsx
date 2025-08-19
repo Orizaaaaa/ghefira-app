@@ -6,6 +6,7 @@ import InputForm from '@/components/elements/input/InputForm'
 import ModalDefault from '@/components/fragments/modal/modal'
 import ModalAlert from '@/components/fragments/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
+import { useAuth } from '@/hook/AuthContext'
 import { formatDateWithDays, formatRupiah } from '@/utils/helper'
 import { Autocomplete, AutocompleteItem, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@heroui/react'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -72,6 +73,7 @@ interface ApiResponse {
 type Props = {}
 
 const page = (props: Props) => {
+    const { role } = useAuth();
     // ===========================
     // Disclosure (modal handlers)
     // ===========================
@@ -307,28 +309,32 @@ const page = (props: Props) => {
     console.log(category);
     console.log(form);
     console.log(responseModel);
+    console.log('anjayyy', role);
 
 
     return (
         <DefaultLayout>
-            <div className=" block md:flex justify-between items-center mb-5">
-                <ButtonSecondary className='w-full md:w-auto p-3 rounded-xl flex justify-center items-center gap-2 text-primaryGreen' onClick={onOpen} >
-                    <LuDatabase color='#5E936C' size={24} />
-                    Tambah Dataset
-                </ButtonSecondary>
+            <div className={`${role !== 'user' ? 'hidden' : ''}`}>
+                <div className={`block md:flex justify-between items-center mb-5 `}>
+                    <ButtonSecondary className='w-full md:w-auto p-3 rounded-xl flex justify-center items-center gap-2 text-primaryGreen' onClick={onOpen} >
+                        <LuDatabase color='#5E936C' size={24} />
+                        Tambah Dataset
+                    </ButtonSecondary>
 
-                <div className="flex justify-center items-center  md:justify-center gap-5 mt-5 md:mt-0">
-                    <div onClick={handleTrainDataset} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
-                        <FaBrain color='#5E936C' size={24} />
-                    </div>
-                    <div onClick={handleStatusModel} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
-                        <FaInfoCircle color='#FEA405' size={24} />
-                    </div>
-                    <div onClick={handleResetModel} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
-                        <MdRestartAlt color='red' size={26} />
+                    <div className="flex justify-center items-center  md:justify-center gap-5 mt-5 md:mt-0">
+                        <div onClick={handleTrainDataset} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
+                            <FaBrain color='#5E936C' size={24} />
+                        </div>
+                        <div onClick={handleStatusModel} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
+                            <FaInfoCircle color='#FEA405' size={24} />
+                        </div>
+                        <div onClick={handleResetModel} className="cursor-pointer h-16 w-16 rounded-full border-2 border-primaryGreen flex justify-center items-center">
+                            <MdRestartAlt color='red' size={26} />
+                        </div>
                     </div>
                 </div>
             </div>
+
 
 
 
@@ -390,8 +396,7 @@ const page = (props: Props) => {
                 📂 List Dataset
             </h1>
 
-
-            <Table
+            {role !== 'user' ? (<Table
                 isCompact
                 className=''
                 aria-label="Tabel Transaksi"
@@ -432,7 +437,7 @@ const page = (props: Props) => {
                     <TableColumn key="amount">JUMLAH</TableColumn>
                     <TableColumn key="type">JENIS</TableColumn>
                     <TableColumn key="createdAt">TANGGAL</TableColumn>
-                    <TableColumn key="actions">AKSI</TableColumn>
+
                 </TableHeader>
                 <TableBody
                     items={currentItems}
@@ -456,43 +461,115 @@ const page = (props: Props) => {
                                     {item.type === 'income' ? 'Pendapatan' : 'Pengeluaran'}
                                 </span>
                             </TableCell>
-
-
                             <TableCell className='text-sm'>{formatDateWithDays(item.createdAt)}</TableCell>
-                            <TableCell className='text-sm'>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => {
-                                            setId(item._id);
-                                            setFormUpdate({
-                                                user: item.user._id,
-                                                saldo: item.saldo._id,
-                                                amount: item.amount.toString(),
-                                                description: item.description,
-                                                type: item.type,
-                                                category: item.category._id
-                                            });
-                                            handleOpenUpdate();
-                                        }}
-                                        className="text-blue-500 hover:text-blue-700"
-                                    >
-                                        <RiEdit2Fill size={20} />
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setId(item._id);
-                                            handleOpenDelete();
-                                        }}
-                                        className="text-red-500 hover:text-red-700"
-                                    >
-                                        <IoMdTrash size={20} />
-                                    </button>
-                                </div>
-                            </TableCell>
                         </TableRow>
                     )}
                 </TableBody>
             </Table>
+            ) : (
+                <Table
+                    isCompact
+                    className=''
+                    aria-label="Tabel Transaksi"
+                    bottomContent={
+                        <div className="flex w-full justify-between items-center">
+                            <div className="text-sm text-gray-600">
+                                Menampilkan {Math.min((currentPage - 1) * rowsPerPage + 1, totalItems)}-
+                                {Math.min(currentPage * rowsPerPage, totalItems)} dari {totalItems} transaksi
+                            </div>
+
+                            {totalPages > 1 && (
+                                <Pagination
+                                    isCompact
+                                    showControls
+                                    showShadow
+                                    color="primary"
+                                    classNames={{
+                                        cursor: "bg-primaryGreen text-white cursor-pointer"
+                                    }}
+                                    page={currentPage}
+                                    total={totalPages}
+                                    onChange={setCurrentPage}
+                                    className="ml-auto"
+                                />
+                            )}
+                        </div>
+                    }
+                    classNames={{
+                        wrapper: "min-h-[250px]",
+                        th: 'bg-secondaryGreen text-white font-semibold',
+                        td: 'text-black',
+                    }}
+                >
+                    <TableHeader>
+                        <TableColumn key="description">DESKRIPSI</TableColumn>
+                        <TableColumn key="category">KATEGORI</TableColumn>
+                        <TableColumn key="saldo">SALDO</TableColumn>
+                        <TableColumn key="amount">JUMLAH</TableColumn>
+                        <TableColumn key="type">JENIS</TableColumn>
+                        <TableColumn key="createdAt">TANGGAL</TableColumn>
+                        <TableColumn key="actions">AKSI</TableColumn>
+                    </TableHeader>
+                    <TableBody
+                        items={currentItems}
+                        isLoading={loading}
+                        loadingContent={<span>Memuat data...</span>}
+                    >
+                        {(item: Transaction) => (
+                            <TableRow key={item._id}>
+                                <TableCell className='text-sm' >{item.description}</TableCell>
+                                <TableCell className='text-sm'>{item.category.name}</TableCell>
+                                <TableCell className='text-sm'>{item.saldo.name}</TableCell>
+                                <TableCell className={item.type === 'income' ? 'text-green-600 text-sm' : 'text-red-600 text-sm'}>
+                                    {formatRupiah(item.amount)}
+                                </TableCell>
+                                <TableCell className='text-sm'>
+                                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs
+                                    ${item.type === 'income'
+                                            ? 'bg-green-100 text-green-800'
+                                            : 'bg-red-100 text-red-800'}`}>
+                                        {item.type === 'income' ? <FaArrowDown className="text-green-500" /> : <FaArrowUp className="text-red-500" />}
+                                        {item.type === 'income' ? 'Pendapatan' : 'Pengeluaran'}
+                                    </span>
+                                </TableCell>
+
+
+                                <TableCell className='text-sm'>{formatDateWithDays(item.createdAt)}</TableCell>
+                                <TableCell className='text-sm'>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                setId(item._id);
+                                                setFormUpdate({
+                                                    user: item.user._id,
+                                                    saldo: item.saldo._id,
+                                                    amount: item.amount.toString(),
+                                                    description: item.description,
+                                                    type: item.type,
+                                                    category: item.category._id
+                                                });
+                                                handleOpenUpdate();
+                                            }}
+                                            className="text-blue-500 hover:text-blue-700"
+                                        >
+                                            <RiEdit2Fill size={20} />
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setId(item._id);
+                                                handleOpenDelete();
+                                            }}
+                                            className="text-red-500 hover:text-red-700"
+                                        >
+                                            <IoMdTrash size={20} />
+                                        </button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>)}
+
 
             <ModalDefault isOpen={isOpen} onClose={onClose}>
                 <h1 className="text-2xl font-bold mb-4" >Latih Model</h1>
