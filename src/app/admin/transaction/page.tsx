@@ -6,6 +6,7 @@ import InputForm from '@/components/elements/input/InputForm'
 import ModalDefault from '@/components/fragments/modal/modal'
 import ModalAlert from '@/components/fragments/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
+import { useAuth } from '@/hook/AuthContext'
 import { formatDate, formatDateWithDays, formatRupiah } from '@/utils/helper'
 import { Autocomplete, AutocompleteItem, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@heroui/react'
 import React, { useEffect, useState, useMemo } from 'react'
@@ -69,6 +70,7 @@ interface ApiResponse {
 type Props = {}
 
 const Page = (props: Props) => {
+    const { role } = useAuth();
     const [id, setId] = useState('');
     const [transaction, setTransaction] = useState<ApiResponse | null>(null);
     const [category, setCategory] = useState([]);
@@ -256,7 +258,7 @@ const Page = (props: Props) => {
 
     return (
         <DefaultLayout>
-            <div className="flex justify-end mb-4 gap-3">
+            <div className={`flex justify-end mb-4 gap-3  ${role !== 'user' && 'hidden'}`}>
                 <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={handleOpenCreate}> + Tambah Transaksi </ButtonSecondary>
             </div>
 
@@ -293,8 +295,7 @@ const Page = (props: Props) => {
                     </div>
                 </div>
             </div>
-
-            <Table
+            {role !== 'user' ? (<Table
                 isCompact
                 className='mt-5'
                 aria-label="Tabel Transaksi"
@@ -335,7 +336,7 @@ const Page = (props: Props) => {
                     <TableColumn key="amount">JUMLAH</TableColumn>
                     <TableColumn key="type">JENIS</TableColumn>
                     <TableColumn key="createdAt">TANGGAL</TableColumn>
-                    <TableColumn key="actions">AKSI</TableColumn>
+
                 </TableHeader>
                 <TableBody
                     items={currentItems}
@@ -359,42 +360,116 @@ const Page = (props: Props) => {
                                     {item.type === 'income' ? 'Pendapatan' : 'Pengeluaran'}
                                 </span>
                             </TableCell>
-
-
                             <TableCell className='text-sm'>{formatDateWithDays(item.createdAt)}</TableCell>
-                            <TableCell className='text-sm'>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => {
-                                            setId(item._id);
-                                            setFormUpdate({
-                                                user: item.user._id,
-                                                saldo: item.saldo._id,
-                                                amount: item.amount.toString(),
-                                                description: item.description,
-                                                type: item.type,
-                                            });
-                                            handleOpenUpdate();
-                                        }}
-                                        className="text-blue-500 hover:text-blue-700"
-                                    >
-                                        <RiEdit2Fill size={20} />
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setId(item._id);
-                                            handleOpenDelete();
-                                        }}
-                                        className="text-red-500 hover:text-red-700"
-                                    >
-                                        <IoMdTrash size={20} />
-                                    </button>
-                                </div>
-                            </TableCell>
                         </TableRow>
                     )}
                 </TableBody>
             </Table>
+
+            ) : (
+                <Table
+                    isCompact
+                    className='mt-5'
+                    aria-label="Tabel Transaksi"
+                    bottomContent={
+                        <div className="flex w-full justify-between items-center">
+                            <div className="text-sm text-gray-600">
+                                Menampilkan {Math.min((currentPage - 1) * rowsPerPage + 1, totalItems)}-
+                                {Math.min(currentPage * rowsPerPage, totalItems)} dari {totalItems} transaksi
+                            </div>
+
+                            {totalPages > 1 && (
+                                <Pagination
+                                    isCompact
+                                    showControls
+                                    showShadow
+                                    color="primary"
+                                    classNames={{
+                                        cursor: "bg-primaryGreen text-white cursor-pointer"
+                                    }}
+                                    page={currentPage}
+                                    total={totalPages}
+                                    onChange={setCurrentPage}
+                                    className="ml-auto"
+                                />
+                            )}
+                        </div>
+                    }
+                    classNames={{
+                        wrapper: "min-h-[250px]",
+                        th: 'bg-secondaryGreen text-white font-semibold',
+                        td: 'text-black',
+                    }}
+                >
+                    <TableHeader>
+                        <TableColumn key="description">DESKRIPSI</TableColumn>
+                        <TableColumn key="category">KATEGORI</TableColumn>
+                        <TableColumn key="saldo">SALDO</TableColumn>
+                        <TableColumn key="amount">JUMLAH</TableColumn>
+                        <TableColumn key="type">JENIS</TableColumn>
+                        <TableColumn key="createdAt">TANGGAL</TableColumn>
+                        <TableColumn key="actions">AKSI</TableColumn>
+                    </TableHeader>
+                    <TableBody
+                        items={currentItems}
+                        isLoading={loading}
+                        loadingContent={<span>Memuat data...</span>}
+                    >
+                        {(item: Transaction) => (
+                            <TableRow key={item._id}>
+                                <TableCell className='text-sm' >{item.description}</TableCell>
+                                <TableCell className='text-sm'>{item.category.name}</TableCell>
+                                <TableCell className='text-sm'>{item.saldo.name}</TableCell>
+                                <TableCell className={item.type === 'income' ? 'text-green-600 text-sm' : 'text-red-600 text-sm'}>
+                                    {formatRupiah(item.amount)}
+                                </TableCell>
+                                <TableCell className='text-sm'>
+                                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs
+                                    ${item.type === 'income'
+                                            ? 'bg-green-100 text-green-800'
+                                            : 'bg-red-100 text-red-800'}`}>
+                                        {item.type === 'income' ? <FaArrowDown className="text-green-500" /> : <FaArrowUp className="text-red-500" />}
+                                        {item.type === 'income' ? 'Pendapatan' : 'Pengeluaran'}
+                                    </span>
+                                </TableCell>
+
+
+                                <TableCell className='text-sm'>{formatDateWithDays(item.createdAt)}</TableCell>
+                                <TableCell className='text-sm'>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                setId(item._id);
+                                                setFormUpdate({
+                                                    user: item.user._id,
+                                                    saldo: item.saldo._id,
+                                                    amount: item.amount.toString(),
+                                                    description: item.description,
+                                                    type: item.type,
+                                                });
+                                                handleOpenUpdate();
+                                            }}
+                                            className="text-blue-500 hover:text-blue-700"
+                                        >
+                                            <RiEdit2Fill size={20} />
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setId(item._id);
+                                                handleOpenDelete();
+                                            }}
+                                            className="text-red-500 hover:text-red-700"
+                                        >
+                                            <IoMdTrash size={20} />
+                                        </button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            )}
+
 
             <ModalDefault isOpen={isOpen} onClose={onClose}>
                 <h1 className='text-xl font-bold my-4'>Tambah Transaksi</h1>

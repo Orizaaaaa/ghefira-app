@@ -49,7 +49,6 @@ interface ApiResponse {
 
 const page = (props: Props) => {
     const { role } = useAuth();
-    console.log('haji ieu role', role);
     const [id, setId] = useState('');
     const [loading, setLoading] = useState(false);
     const { isOpen, onOpen, onClose } = useDisclosure();
