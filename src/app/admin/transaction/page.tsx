@@ -258,7 +258,7 @@ const Page = (props: Props) => {
 
     return (
         <DefaultLayout>
-            <div className={`flex justify-end mb-4 gap-3  ${role !== 'user' && 'hidden'}`}>
+            <div className={`flex justify-end mb-4 gap-3  ${role !== 'admin' && 'hidden'}`}>
                 <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={handleOpenCreate}> + Tambah Transaksi </ButtonSecondary>
             </div>
 
@@ -295,7 +295,7 @@ const Page = (props: Props) => {
                     </div>
                 </div>
             </div>
-            {role !== 'user' ? (
+            {role !== 'admin' ? (
                 <Table
                     isCompact
                     className='mt-5'

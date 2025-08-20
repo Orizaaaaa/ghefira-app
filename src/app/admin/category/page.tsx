@@ -191,7 +191,7 @@ const CategoryPage = () => {
     return (
         <DefaultLayout>
             <div className="flex justify-end mb-4 gap-3">
-                <ButtonSecondary className={`py-2 px-4 rounded-lg   ${role !== 'user' && 'hidden'} `} onClick={handleOpenCreate}>
+                <ButtonSecondary className={`py-2 px-4 rounded-lg   ${role !== 'admin' && 'hidden'} `} onClick={handleOpenCreate}>
                     + Tambah Kategori
                 </ButtonSecondary>
             </div>
@@ -235,7 +235,7 @@ const CategoryPage = () => {
 
             {/* Category Table */}
             <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                {role !== 'user' ? (
+                {role !== 'admin' ? (
                     <Table
                         aria-label="Daftar Kategori"
                         isStriped

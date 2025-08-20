@@ -314,7 +314,7 @@ const page = (props: Props) => {
 
     return (
         <DefaultLayout>
-            <div className={`${role !== 'user' ? 'hidden' : ''}`}>
+            <div className={`${role !== 'admin' ? 'hidden' : ''}`}>
                 <div className={`block md:flex justify-between items-center mb-5 `}>
                     <ButtonSecondary className='w-full md:w-auto p-3 rounded-xl flex justify-center items-center gap-2 text-primaryGreen' onClick={onOpen} >
                         <LuDatabase color='#5E936C' size={24} />
@@ -396,7 +396,7 @@ const page = (props: Props) => {
                 📂 List Dataset
             </h1>
 
-            {role !== 'user' ? (<Table
+            {role !== 'admin' ? (<Table
                 isCompact
                 className=''
                 aria-label="Tabel Transaksi"
