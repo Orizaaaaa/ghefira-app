@@ -7,11 +7,14 @@ import { realLogo } from "@/app/image";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [userData, setUserData]: any = useState({});
+  const [userData, setUserData]: any = useState('');
   const [role, setRole] = useState<string | null>(null);
   // Mengambil data dari localStorage setelah komponen dirender di client
   useEffect(() => {
-    setUserData(JSON.parse(localStorage.getItem('user') || '{}'));
+    const storedRole = localStorage.getItem('role');
+    if (storedRole) {
+      setUserData(storedRole);
+    }
   }, []);
 
   const trigger = useRef<any>(null);
@@ -50,10 +53,10 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-primaryGreen ">
-            {userData.name ? capitalizeWords(userData.name) : "User"}
+            {userData === 'admin' ? 'Admin' : 'Kepala Sekolah'}
           </span>
           <span className="block text-xs text-primaryGreen">
-            {userData.role ? capitalizeWords(userData.role) : "Pengguna"}
+            online
           </span>
         </span>
 
