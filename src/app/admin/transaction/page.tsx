@@ -100,9 +100,10 @@ const Page = (props: Props) => {
         type: '',
     })
 
-    // Calculate pagination values
     const totalItems = transaction?.meta?.pagination?.total || 0;
-    const totalPages = Math.ceil(totalItems / rowsPerPage);
+    // Hitung total halaman asli
+    const calculatedTotalPages = Math.ceil(totalItems / rowsPerPage);
+    const totalPages = Math.max(calculatedTotalPages, 20);
 
     // Get current page items
     const currentItems = useMemo(() => {

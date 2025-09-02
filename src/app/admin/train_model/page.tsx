@@ -116,7 +116,9 @@ const Page = (props: Props) => {
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
     const totalItems = transaction?.meta?.pagination?.total || 0;
-    const totalPages = Math.ceil(totalItems / rowsPerPage);
+    // Hitung total halaman asli
+    const calculatedTotalPages = Math.ceil(totalItems / rowsPerPage);
+    const totalPages = Math.max(calculatedTotalPages, 20);
 
     const currentItems = useMemo(() => {
         if (!transaction?.data) return [];
@@ -340,7 +342,7 @@ const Page = (props: Props) => {
 
 
 
-            <h1 className="text-2xl font-bold  mt-11 mb-3 inline-block italic text-primaryGreen">
+            <h1 className="text-2xl font-bold   mb-3 inline-block italic text-primaryGreen">
                 📂 List Dataset
             </h1>
 

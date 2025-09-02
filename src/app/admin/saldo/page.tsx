@@ -128,7 +128,10 @@ const page = (props: Props) => {
 
     // Calculate pagination
     const totalItems = apiResponse?.meta?.pagination?.total || 0;
-    const totalPages = Math.ceil(totalItems / rowsPerPage);
+
+    // Hitung total halaman asli
+    const calculatedTotalPages = Math.ceil(totalItems / rowsPerPage);
+    const totalPages = Math.max(calculatedTotalPages, 20);
 
     // Get current page items
     const currentItems = React.useMemo(() => {
