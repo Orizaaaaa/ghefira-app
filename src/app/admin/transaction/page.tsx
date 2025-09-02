@@ -345,10 +345,10 @@ const Page = (props: Props) => {
                         loadingContent={<span>Memuat data...</span>}
                     >
                         {(item: Transaction) => (
-                            <TableRow key={item._id}>
-                                <TableCell className='text-sm' >{item.description}</TableCell>
-                                <TableCell className='text-sm'>{item.category.name}</TableCell>
-                                <TableCell className='text-sm'>{item.saldo.name}</TableCell>
+                            <TableRow key={item?._id}>
+                                <TableCell className='text-sm' >{item?.description}</TableCell>
+                                <TableCell className='text-sm'>{item?.category?.name}</TableCell>
+                                <TableCell className='text-sm'>{item?.saldo?.name}</TableCell>
                                 <TableCell className={item.type === 'income' ? 'text-green-600 text-sm' : 'text-red-600 text-sm'}>
                                     {formatRupiah(item.amount)}
                                 </TableCell>
@@ -417,10 +417,10 @@ const Page = (props: Props) => {
                         loadingContent={<span>Memuat data...</span>}
                     >
                         {(item: Transaction) => (
-                            <TableRow key={item._id}>
-                                <TableCell className='text-sm' >{item.description}</TableCell>
-                                <TableCell className='text-sm'>{item.category.name}</TableCell>
-                                <TableCell className='text-sm'>{item.saldo.name}</TableCell>
+                            <TableRow key={item?._id}>
+                                <TableCell className='text-sm' >{item?.description}</TableCell>
+                                <TableCell className='text-sm'>{item?.category?.name}</TableCell>
+                                <TableCell className='text-sm'>{item?.saldo?.name}</TableCell>
                                 <TableCell className={item.type === 'income' ? 'text-green-600 text-sm' : 'text-red-600 text-sm'}>
                                     {formatRupiah(item.amount)}
                                 </TableCell>

@@ -81,12 +81,26 @@ const page = (props: Props) => {
     }));
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+
+        // Hanya ambil angka (hapus minus dan karakter lain)
+        const sanitizedValue = name === "amount"
+            ? value.replace(/[^0-9]/g, '')
+            : value;
+
+        setForm({ ...form, [name]: sanitizedValue });
     };
 
     const handleChangeUpdate = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormUpdate({ ...formUpdate, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+
+        const sanitizedValue = name === "amount"
+            ? value.replace(/[^0-9]/g, '')
+            : value;
+
+        setFormUpdate({ ...formUpdate, [name]: sanitizedValue });
     };
+
 
     const fetchData = async () => {
         setLoading(true);
@@ -333,12 +347,12 @@ const page = (props: Props) => {
                         loadingContent={<span>Memuat data...</span>}
                     >
                         {(item) => (
-                            <TableRow key={item._id}>
-                                <TableCell>{item.name}</TableCell>
-                                <TableCell>{formatCurrency(item.amount)}</TableCell>
-                                <TableCell>{item.description}</TableCell>
-                                <TableCell>{formatDate(item.createdAt)}</TableCell>
-                                <TableCell>{formatDate(item.updatedAt)}</TableCell>
+                            <TableRow key={item?._id}>
+                                <TableCell>{item?.name}</TableCell>
+                                <TableCell>{formatCurrency(item?.amount)}</TableCell>
+                                <TableCell>{item?.description}</TableCell>
+                                <TableCell>{formatDate(item?.createdAt)}</TableCell>
+                                <TableCell>{formatDate(item?.updatedAt)}</TableCell>
                             </TableRow>
                         )}
                     </TableBody>
@@ -387,12 +401,12 @@ const page = (props: Props) => {
                             loadingContent={<span>Memuat data...</span>}
                         >
                             {(item) => (
-                                <TableRow key={item._id}>
+                                <TableRow key={item?._id}>
                                     <TableCell>{item.name}</TableCell>
-                                    <TableCell>{formatCurrency(item.amount)}</TableCell>
-                                    <TableCell>{item.description}</TableCell>
-                                    <TableCell>{formatDate(item.createdAt)}</TableCell>
-                                    <TableCell>{formatDate(item.updatedAt)}</TableCell>
+                                    <TableCell>{formatCurrency(item?.amount)}</TableCell>
+                                    <TableCell>{item?.description}</TableCell>
+                                    <TableCell>{formatDate(item?.createdAt)}</TableCell>
+                                    <TableCell>{formatDate(item?.updatedAt)}</TableCell>
                                     <TableCell>
                                         <div className="flex gap-2">
                                             <button
