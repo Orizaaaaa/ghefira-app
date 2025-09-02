@@ -274,18 +274,18 @@ const CategoryPage = () => {
                             loadingContent={<span>Memuat data...</span>}
                         >
                             {(item) => (
-                                <TableRow key={item._id}>
-                                    <TableCell>{item.name}</TableCell>
+                                <TableRow key={item?._id}>
+                                    <TableCell>{item?.name}</TableCell>
                                     <TableCell>
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.type === 'income'
                                             ? 'bg-green-100 text-green-800'
                                             : 'bg-red-100 text-red-800'
                                             }`}>
-                                            {item.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
+                                            {item?.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
                                         </span>
                                     </TableCell>
-                                    <TableCell className="max-w-xs truncate">{item.description}</TableCell>
-                                    <TableCell>{formatDateWithDays(item.createdAt)}</TableCell>
+                                    <TableCell className="max-w-xs truncate">{item?.description}</TableCell>
+                                    <TableCell>{formatDateWithDays(item?.createdAt)}</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>
@@ -340,8 +340,8 @@ const CategoryPage = () => {
                                             {item.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
                                         </span>
                                     </TableCell>
-                                    <TableCell className="max-w-xs truncate">{item.description}</TableCell>
-                                    <TableCell>{formatDateWithDays(item.createdAt)}</TableCell>
+                                    <TableCell className="max-w-xs truncate">{item?.description}</TableCell>
+                                    <TableCell>{formatDateWithDays(item?.createdAt)}</TableCell>
                                     <TableCell>
                                         <div className="flex gap-2">
                                             <button
@@ -351,7 +351,7 @@ const CategoryPage = () => {
                                                 <RiEdit2Fill size={20} />
                                             </button>
                                             <button
-                                                onClick={() => handleOpenDelete(item._id)}
+                                                onClick={() => handleOpenDelete(item?._id)}
                                                 className="text-red-500 hover:text-red-700"
                                             >
                                                 <IoMdTrash size={20} />
