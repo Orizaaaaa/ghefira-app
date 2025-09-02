@@ -404,14 +404,14 @@ const Page = (props: Props) => {
                             </TableCell>
                             <TableCell className='text-sm'>
                                 <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs
-                                    ${item.type === 'income'
+                                    ${item?.type === 'income'
                                         ? 'bg-green-100 text-green-800'
                                         : 'bg-red-100 text-red-800'}`}>
-                                    {item.type === 'income' ? <FaArrowDown className="text-green-500" /> : <FaArrowUp className="text-red-500" />}
-                                    {item.type === 'income' ? 'Pendapatan' : 'Pengeluaran'}
+                                    {item?.type === 'income' ? <FaArrowDown className="text-green-500" /> : <FaArrowUp className="text-red-500" />}
+                                    {item?.type === 'income' ? 'Pendapatan' : 'Pengeluaran'}
                                 </span>
                             </TableCell>
-                            <TableCell className='text-sm'>{formatDateWithDays(item.createdAt)}</TableCell>
+                            <TableCell className='text-sm'>{formatDateWithDays(item?.createdAt)}</TableCell>
                         </TableRow>
                     )}
                 </TableBody>
@@ -466,37 +466,37 @@ const Page = (props: Props) => {
                         loadingContent={<span>Memuat data...</span>}
                     >
                         {(item: Transaction) => (
-                            <TableRow key={item._id}>
+                            <TableRow key={item?._id}>
                                 <TableCell className='text-sm' >{item?.description}</TableCell>
                                 <TableCell className='text-sm'>{item?.category?.name}</TableCell>
                                 <TableCell className='text-sm'>{item?.saldo?.name}</TableCell>
-                                <TableCell className={item.type === 'income' ? 'text-green-600 text-sm' : 'text-red-600 text-sm'}>
-                                    {formatRupiah(item.amount)}
+                                <TableCell className={item?.type === 'income' ? 'text-green-600 text-sm' : 'text-red-600 text-sm'}>
+                                    {formatRupiah(item?.amount)}
                                 </TableCell>
                                 <TableCell className='text-sm'>
                                     <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs
-                                    ${item.type === 'income'
+                                    ${item?.type === 'income'
                                             ? 'bg-green-100 text-green-800'
                                             : 'bg-red-100 text-red-800'}`}>
-                                        {item.type === 'income' ? <FaArrowDown className="text-green-500" /> : <FaArrowUp className="text-red-500" />}
-                                        {item.type === 'income' ? 'Pendapatan' : 'Pengeluaran'}
+                                        {item?.type === 'income' ? <FaArrowDown className="text-green-500" /> : <FaArrowUp className="text-red-500" />}
+                                        {item?.type === 'income' ? 'Pendapatan' : 'Pengeluaran'}
                                     </span>
                                 </TableCell>
 
 
-                                <TableCell className='text-sm'>{formatDateWithDays(item.createdAt)}</TableCell>
+                                <TableCell className='text-sm'>{formatDateWithDays(item?.createdAt)}</TableCell>
                                 <TableCell className='text-sm'>
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => {
-                                                setId(item._id);
+                                                setId(item?._id);
                                                 setFormUpdate({
-                                                    user: item.user._id,
-                                                    saldo: item.saldo._id,
-                                                    amount: item.amount.toString(),
-                                                    description: item.description,
-                                                    type: item.type,
-                                                    category: item.category._id
+                                                    user: item?.user?._id,
+                                                    saldo: item?.saldo?._id,
+                                                    amount: item?.amount.toString(),
+                                                    description: item?.description,
+                                                    type: item?.type,
+                                                    category: item?.category?._id
                                                 });
                                                 handleOpenUpdate();
                                             }}
@@ -506,7 +506,7 @@ const Page = (props: Props) => {
                                         </button>
                                         <button
                                             onClick={() => {
-                                                setId(item._id);
+                                                setId(item?._id);
                                                 handleOpenDelete();
                                             }}
                                             className="text-red-500 hover:text-red-700"
