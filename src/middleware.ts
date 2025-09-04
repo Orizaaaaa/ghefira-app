@@ -10,7 +10,7 @@ export async function middleware(req: NextRequest) {
         pathname.startsWith('/api/') ||
         pathname.startsWith('/static/') ||
         pathname.includes('.') ||
-        pathname === '/login') {
+        pathname === '/') {
         return NextResponse.next();
     }
 
@@ -18,7 +18,7 @@ export async function middleware(req: NextRequest) {
     if (!token) {
         console.log('No token found, redirecting to login');
         const url = req.nextUrl.clone();
-        url.pathname = '/login';
+        url.pathname = '/';
         return NextResponse.redirect(url);
     }
 
