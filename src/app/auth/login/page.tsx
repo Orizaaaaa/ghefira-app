@@ -88,7 +88,7 @@ const Login = () => {
                 console.log('kanjut', res.data);
                 setErrorLogin('');
                 const tokenCookies = `token=${res.data.token}`;
-                const roleCookies = `role=${res.data.role}`;
+                const roleCookies = `role=${res.data.user.role}`;
                 document.cookie = tokenCookies; // Set cookie
                 document.cookie = roleCookies; // Set cookie
                 localStorage.setItem('name', res.data.user.name);
