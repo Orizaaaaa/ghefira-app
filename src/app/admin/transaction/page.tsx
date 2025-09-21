@@ -1,5 +1,5 @@
 'use client'
-import { createTransactionModel, deleteTransaction, getAllCategory, getAllSaldo, getAllTransaction, updateTransaction } from '@/api/method'
+import { createTransactionModel, createTransactionTrainModel, deleteTransaction, getAllCategory, getAllSaldo, getAllTransaction, updateTransaction } from '@/api/method'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import InputForm from '@/components/elements/input/InputForm'
@@ -15,6 +15,7 @@ import { BiTrendingDown, BiTrendingUp } from 'react-icons/bi'
 import { BsBox, BsLayers } from 'react-icons/bs'
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa6'
 import { IoMdTrash } from 'react-icons/io'
+import { LuDatabase } from 'react-icons/lu'
 import { RiEdit2Fill } from 'react-icons/ri'
 import { Cell, Pie, PieChart, PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts'
 
@@ -70,6 +71,7 @@ interface ApiResponse {
 type Props = {}
 
 const Page = (props: Props) => {
+
     const { role } = useAuth();
     const [id, setId] = useState('');
     const [transaction, setTransaction] = useState<ApiResponse | null>(null);
@@ -78,6 +80,7 @@ const Page = (props: Props) => {
     const [loading, setLoading] = useState(false);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isOpenUpdate, onOpen: onOpenUpdate, onClose: onCloseUpdate } = useDisclosure();
+    const { isOpen: isOpenDataset, onOpen: onOpenDataset, onClose: onCloseDataset } = useDisclosure();
     const { isOpen: isOpenDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
 
     // Pagination state
@@ -90,6 +93,16 @@ const Page = (props: Props) => {
         amount: '',
         description: '',
         type: '',
+    });
+
+
+    const [formDataset, setFormDataset] = useState({
+        user: '',
+        category: '',
+        saldo: '',
+        amount: '',
+        description: '',
+        type: ''
     });
 
     const [formUpdate, setFormUpdate] = useState({
@@ -115,6 +128,10 @@ const Page = (props: Props) => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleChangeDataset = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormDataset({ ...formDataset, [e.target.name]: e.target.value });
     };
 
     const handleChangeUpdate = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -157,9 +174,19 @@ const Page = (props: Props) => {
                 ...prev,
                 user: id
             }));
+            setFormDataset(prev => ({
+                ...prev,
+                user: id
+            }));
         }
         fetchData();
     }, []);
+
+
+    const handleSelectionChangeDataset = (key: string | null, field: 'saldo' | 'type' | 'category') => {
+        if (!key) return;
+        setFormDataset(prev => ({ ...prev, [field]: key }));
+    };
 
     const handleSelectionChange = (key: string | null, field: 'saldo' | 'type') => {
         if (!key) return;
@@ -250,10 +277,47 @@ const Page = (props: Props) => {
         }
     });
 
+    const handleSubmitModel = async () => {
+        const { user, category, saldo, amount, description, type } = formDataset;
+
+        if (!user || !category || !saldo || !amount || !description || !type) {
+            toast.error('Semua data harus diisi!');
+            return;
+        }
+
+        const loadingToast = toast.loading('Sedang menyimpan data...');
+        try {
+            await createTransactionTrainModel(formDataset, (result: any) => {
+                console.log(result);
+                setFormDataset({
+                    user: '',
+                    category: '',
+                    saldo: '',
+                    amount: '',
+                    description: '',
+                    type: ''
+                });
+                fetchData();
+                const id = localStorage.getItem('id');
+                if (id) {
+                    setForm(prev => ({ ...prev, user: id }));
+                }
+
+                toast.success('Data berhasil disimpan!', { id: loadingToast });
+                onCloseDataset();
+            });
+        } catch (error) {
+            console.error(error);
+            toast.error('Gagal menyimpan data!', { id: loadingToast });
+        }
+    };
     console.log('transaksi', transaction?.data);
     console.log('saldo', saldo);
     console.log('category', category.length);
     console.log('id', id);
+
+    console.log('alamak', formDataset);
+
 
 
 
@@ -261,6 +325,14 @@ const Page = (props: Props) => {
         <DefaultLayout>
             <div className={`flex justify-end mb-4 gap-3  ${role !== 'admin' && 'hidden'}`}>
                 <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={handleOpenCreate}> + Tambah Transaksi </ButtonSecondary>
+                <ButtonSecondary className='py-1 px-2 rounded-xl flex items-center gap-2 justify-center' onClick={onOpenDataset} >
+                    <LuDatabase color='#5E936C' size={16} />
+                    Tambah Dataset
+                </ButtonSecondary>
+            </div>
+
+            <div className={`block md:flex justify-between items-center mb-5 `}>
+
             </div>
 
             <div className="flex flex-col gap-6">
@@ -532,6 +604,81 @@ const Page = (props: Props) => {
                         Simpan
                     </ButtonPrimary>
                 </div>
+            </ModalDefault>
+
+            <ModalDefault isOpen={isOpenDataset} onClose={onCloseDataset}>
+                <h1 className="text-2xl font-bold mb-4" >Tambah Dataset</h1>
+                <div className="flex gap-4">
+                    <div className="">
+                        <h1>Pilih Kategori</h1>
+                        <Autocomplete
+                            className="w-full"
+                            variant='bordered'
+                            onSelectionChange={(e: any) => handleSelectionChangeDataset(e, 'saldo')}
+                            value={formDataset.saldo}
+                        >
+                            {saldo.map((item: any) => (
+                                <AutocompleteItem textValue={item.name} key={item._id}>
+                                    {item.name} <span className='text-sm text-green-700'>{formatRupiah(item.amount)}</span>
+                                </AutocompleteItem>
+                            ))}
+                        </Autocomplete>
+                    </div>
+                    <div className="">
+                        <h1>Pilih Saldo</h1>
+                        <Autocomplete
+                            className="w-full"
+                            variant='bordered'
+                            onSelectionChange={(e: any) => handleSelectionChangeDataset(e, 'type')}
+                            value={formDataset.type}
+                        >
+                            {type.map((item) => (
+                                <AutocompleteItem textValue={item.label} key={item.key}>{item.label}</AutocompleteItem>
+                            ))}
+                        </Autocomplete>
+                    </div>
+                </div>
+                <InputForm htmlFor="amount" type="text" title='Jumlah'
+                    className='bg-slate-100 rounded-md mt-3 ' onChange={handleChangeDataset}
+                    value={formDataset.amount}
+                />
+
+                <InputForm htmlFor="description" type="text" title='Deskripsi'
+                    className='bg-slate-100 rounded-md mt-3 ' onChange={handleChangeDataset}
+                    value={formDataset.description}
+                />
+
+                <div className="">
+                    <h1>Pilih Kategori</h1>
+                    <Autocomplete
+                        className="w-full"
+                        variant='bordered'
+                        onSelectionChange={(e: any) => handleSelectionChangeDataset(e, 'category')}
+                        value={formDataset.category}
+                    >
+                        {category.map((item: any) => (
+                            <AutocompleteItem textValue={item.name} key={item._id}>{item.name}
+                                <span className={
+                                    `inline-block px-2 py-1 rounded-full text-xs  ml-2 ${item.type === 'income'
+                                        ? 'bg-green-100 text-green-800'
+                                        : 'bg-red-100 text-red-800'
+                                    }`}
+                                >
+                                    {item.type === 'income' ? 'Pendapatan' : 'Pengeluaran'}
+                                </span> </AutocompleteItem>
+                        ))}
+                    </Autocomplete>
+                </div>
+
+                <div className="flex justify-end gap-2 mt-4">
+                    <ButtonSecondary className="py-1 px-4 rounded-xl" onClick={onClose}>
+                        Batal
+                    </ButtonSecondary>
+                    <ButtonPrimary className="py-1 px-4 rounded-xl" onClick={handleSubmitModel} >
+                        Simpan
+                    </ButtonPrimary>
+                </div>
+
             </ModalDefault>
 
             <ModalDefault isOpen={isOpenUpdate} onClose={onCloseUpdate}>
