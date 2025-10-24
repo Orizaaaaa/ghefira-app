@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const axiosInterceptor = axios.create({
-    baseURL: ' https://ghefira-cashflow.vercel.app',
+    baseURL: 'https://ghefira-2.vercel.app',
     // timeout: 5000,
 });
 

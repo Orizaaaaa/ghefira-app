@@ -1,10 +1,9 @@
 'use client'
-import { createSaldo, deleteSaldo, getAllSaldo, getSumaryMounth, updateSaldo } from '@/api/method'
+import { createAccountingAccount, getAllAccountingAccounts, getSumaryMounth, updateAccountingAccount } from '@/api/method'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import InputForm from '@/components/elements/input/InputForm'
 import ModalDefault from '@/components/fragments/modal/modal'
-import ModalAlert from '@/components/fragments/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
 import { useAuth } from '@/hook/AuthContext'
 import { formatRupiah } from '@/utils/helper'
@@ -14,7 +13,6 @@ import { s } from 'framer-motion/client'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { FaPenSquare } from 'react-icons/fa'
-import { IoMdTrash } from 'react-icons/io'
 import { MdCheckBoxOutlineBlank } from 'react-icons/md'
 import { RiEdit2Fill } from 'react-icons/ri'
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -22,18 +20,29 @@ import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Too
 type Props = {}
 
 
-interface Saldo {
+interface AccountingAccount {
     _id: string;
     name: string;
-    amount: number;
-    description: string;
+    code: string;
+    type: string;
+    normal_balance: string;
+    balance: number;
+    user: string;
+    is_active: boolean;
     createdAt: string;
     updatedAt: string;
     __v: number;
+    display_balance: number;
+    accounting_balance: number;
 }
 
 interface ApiResponse {
-    meta: {
+    code: number;
+    status: string;
+    data: {
+        accounts: AccountingAccount[];
+    };
+    meta?: {
         code: number;
         message: string;
         pagination: {
@@ -44,16 +53,16 @@ interface ApiResponse {
         };
         status: string;
     };
-    data: Saldo[];
 }
 
 const page = (props: Props) => {
     const { role } = useAuth();
     const [id, setId] = useState('');
     const [loading, setLoading] = useState(false);
+    const [createLoading, setCreateLoading] = useState(false);
+    const [updateLoading, setUpdateLoading] = useState(false);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isOpenUpdate, onOpen: onOpenUpdate, onClose: onCloseUpdate } = useDisclosure();
-    const { isOpen: isOpenDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
     const [monthlyData, setMonthlyData] = useState({} as any);
     const target = 10_000_000;
     const current = monthlyData?.income ?? 0;
@@ -62,43 +71,59 @@ const page = (props: Props) => {
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
     const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
-    const [saldoData, setSaldoData] = useState<Saldo[]>([]);
+    const [accountingData, setAccountingData] = useState<AccountingAccount[]>([]);
 
     const [form, setForm] = useState({
         name: '',
-        amount: '',
-        description: ''
+        code: '',
+        type: '',
+        normal_balance: '',
+        balance: '',
+        is_active: true
     });
 
     const [formUpdate, setFormUpdate] = useState({
         name: '',
-        amount: 0,
-        description: ''
+        code: '',
+        type: '',
+        normal_balance: '',
+        balance: 0,
+        is_active: true
     });
 
     const dataSideChart = Array.from({ length: 30 }, () => ({
         value: Math.floor(Math.random() * 1000),
     }));
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value, type } = e.target;
 
-        // Hanya ambil angka (hapus minus dan karakter lain)
-        const sanitizedValue = name === "amount"
-            ? value.replace(/[^0-9]/g, '')
-            : value;
+        if (type === 'checkbox') {
+            const checked = (e.target as HTMLInputElement).checked;
+            setForm({ ...form, [name]: checked });
+        } else {
+            // Hanya ambil angka untuk balance
+            const sanitizedValue = name === "balance"
+                ? value.replace(/[^0-9]/g, '')
+                : value;
 
-        setForm({ ...form, [name]: sanitizedValue });
+            setForm({ ...form, [name]: sanitizedValue });
+        }
     };
 
-    const handleChangeUpdate = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
+    const handleChangeUpdate = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value, type } = e.target;
 
-        const sanitizedValue = name === "amount"
-            ? value.replace(/[^0-9]/g, '')
-            : value;
+        if (type === 'checkbox') {
+            const checked = (e.target as HTMLInputElement).checked;
+            setFormUpdate({ ...formUpdate, [name]: checked });
+        } else {
+            const sanitizedValue = name === "balance"
+                ? value.replace(/[^0-9]/g, '')
+                : value;
 
-        setFormUpdate({ ...formUpdate, [name]: sanitizedValue });
+            setFormUpdate({ ...formUpdate, [name]: sanitizedValue });
+        }
     };
 
 
@@ -108,15 +133,31 @@ const page = (props: Props) => {
         const currentMonth = now.getMonth() + 1;
         const currentYear = now.getFullYear();
         try {
-            const result = await getAllSaldo();
+            const result = await getAllAccountingAccounts();
             const resultDate = await getSumaryMounth(currentMonth, currentYear, (res: any) => {
                 setMonthlyData(res); // <-- data bulanan, bisa untuk card ringkasan
             });
-            console.log(resultDate);
+            console.log('API Response:', result.data.accounts);
             setApiResponse(result);
-            setSaldoData(result.data);
+
+            // Handle different response structures
+            if (result && result.data && result.data.accounts && Array.isArray(result.data.accounts)) {
+                // If result has a data.accounts property that is an array
+                setAccountingData(result.data.accounts);
+            } else if (result && Array.isArray(result)) {
+                // If result is directly an array
+                setAccountingData(result);
+            } else if (result && result.data && Array.isArray(result.data)) {
+                // If result has a data property that is an array
+                setAccountingData(result.data);
+            } else {
+                // Fallback to empty array
+                console.warn('Unexpected API response structure:', result);
+                setAccountingData([]);
+            }
         } catch (error) {
             console.error('Error fetching data:', error);
+            setAccountingData([]);
         } finally {
             setLoading(false);
         }
@@ -127,7 +168,7 @@ const page = (props: Props) => {
     }, []);
 
     // Calculate pagination
-    const totalItems = apiResponse?.meta?.pagination?.total || 0;
+    const totalItems = Array.isArray(accountingData) ? accountingData.length : (apiResponse?.meta?.pagination?.total || 0);
 
     // Hitung total halaman asli
     const calculatedTotalPages = Math.ceil(totalItems / rowsPerPage);
@@ -135,10 +176,13 @@ const page = (props: Props) => {
 
     // Get current page items
     const currentItems = React.useMemo(() => {
+        if (!Array.isArray(accountingData)) {
+            return [];
+        }
         const start = (currentPage - 1) * rowsPerPage;
         const end = start + rowsPerPage;
-        return saldoData.slice(start, end);
-    }, [currentPage, saldoData, rowsPerPage]);
+        return accountingData.slice(start, end);
+    }, [currentPage, accountingData, rowsPerPage]);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('id-ID', {
@@ -159,76 +203,78 @@ const page = (props: Props) => {
         onOpen();
     }
 
-    const handleCreateSaldo = async () => {
-        if (!form.name || !form.amount || !form.description) {
+    const handleCreateAccount = async () => {
+        if (!form.name || !form.code || !form.type || !form.normal_balance) {
             toast.error('Semua field harus diisi!');
             return;
         }
 
-        const loadingToast = toast.loading('Menyimpan data saldo...');
+        setCreateLoading(true);
+        const loadingToast = toast.loading('Menyimpan data akun...');
         try {
-            await createSaldo(form, (res: any) => {
-                toast.success('Saldo berhasil ditambahkan', { id: loadingToast });
+            await createAccountingAccount(form, (res: any) => {
+                toast.success('Akun berhasil ditambahkan', { id: loadingToast });
 
                 fetchData();
                 onClose();
                 setForm({
                     name: '',
-                    amount: '',
-                    description: ''
+                    code: '',
+                    type: '',
+                    normal_balance: '',
+                    balance: '',
+                    is_active: true
                 });
             });
         } catch (error) {
             console.error(error);
-            toast.error('Gagal menambahkan saldo', { id: loadingToast });
+            toast.error('Gagal menambahkan akun', { id: loadingToast });
+        } finally {
+            setCreateLoading(false);
         }
     };
 
-    const handleEditSaldo = async () => {
-        if (!formUpdate.name || !formUpdate.amount || !formUpdate.description) {
+    const handleEditAccount = async () => {
+        if (!formUpdate.name || !formUpdate.code || !formUpdate.type || !formUpdate.normal_balance) {
             toast.error('Semua field harus diisi!');
             return;
         }
 
-        const loadingToast = toast.loading('Mengubah data saldo...');
+        setUpdateLoading(true);
+        const loadingToast = toast.loading('Mengubah data akun...');
         try {
-            await updateSaldo(id, formUpdate, (res: any) => {
-                toast.success('Saldo berhasil diubah', { id: loadingToast });
+            await updateAccountingAccount(id, formUpdate, (res: any) => {
+                toast.success('Akun berhasil diubah', { id: loadingToast });
 
                 fetchData();
                 onCloseUpdate();
                 setFormUpdate({
                     name: '',
-                    amount: 0,
-                    description: ''
+                    code: '',
+                    type: '',
+                    normal_balance: '',
+                    balance: 0,
+                    is_active: true
                 });
             });
         } catch (error) {
             console.error(error);
-            toast.error('Gagal mengubah saldo', { id: loadingToast });
+            toast.error('Gagal mengubah akun', { id: loadingToast });
+        } finally {
+            setUpdateLoading(false);
         }
     };
 
 
-    const handleDeleteSaldo = async () => {
-        const loadingToast = toast.loading('Menghapus data saldo...');
-        try {
-            await deleteSaldo(id);
-            toast.success('Saldo berhasil dihapus', { id: loadingToast });
-            fetchData();
-            onCloseDelete();
-        } catch (error) {
-            console.error(error);
-            toast.error('Gagal menghapus saldo', { id: loadingToast });
-        }
-    }
 
     console.log(monthlyData);
 
     return (
         <DefaultLayout>
             <div className={` flex justify-end mb-4 gap-3 ${role !== 'admin' && 'hidden'}`}>
-                <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={openModalCreate}> + Tambah Saldo </ButtonSecondary>
+                <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={openModalCreate}>
+                    {createLoading ? 'Menyimpan...' : '+ Tambah Akun'}
+                </ButtonSecondary>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 {/* Saldo Masuk Card - Enhanced */}
@@ -338,11 +384,13 @@ const page = (props: Props) => {
                 >
                     <TableHeader>
                         <TableColumn key="name">NAMA</TableColumn>
-                        <TableColumn key="amount">JUMLAH</TableColumn>
-                        <TableColumn key="description">DESKRIPSI</TableColumn>
+                        <TableColumn key="code">KODE</TableColumn>
+                        <TableColumn key="type">TIPE</TableColumn>
+                        <TableColumn key="normal_balance">NORMAL BALANCE</TableColumn>
+                        <TableColumn key="balance">SALDO</TableColumn>
+                        <TableColumn key="is_active">STATUS</TableColumn>
                         <TableColumn key="createdAt">DIBUAT</TableColumn>
-                        <TableColumn key="updatedAt">DIPERBARUI</TableColumn>
-
+                        <TableColumn key="actions">AKSI</TableColumn>
                     </TableHeader>
                     <TableBody
                         items={currentItems}
@@ -352,10 +400,41 @@ const page = (props: Props) => {
                         {(item) => (
                             <TableRow key={item?._id}>
                                 <TableCell>{item?.name}</TableCell>
-                                <TableCell>{formatCurrency(item?.amount)}</TableCell>
-                                <TableCell>{item?.description}</TableCell>
+                                <TableCell>{item?.code}</TableCell>
+                                <TableCell>{item?.type}</TableCell>
+                                <TableCell>{item?.normal_balance}</TableCell>
+                                <TableCell>{formatCurrency(item?.balance)}</TableCell>
+                                <TableCell>
+                                    <span className={`px-2 py-1 rounded-full text-xs ${item?.is_active
+                                        ? 'bg-green-100 text-green-800'
+                                        : 'bg-red-100 text-red-800'
+                                        }`}>
+                                        {item?.is_active ? 'Aktif' : 'Tidak Aktif'}
+                                    </span>
+                                </TableCell>
                                 <TableCell>{formatDate(item?.createdAt)}</TableCell>
-                                <TableCell>{formatDate(item?.updatedAt)}</TableCell>
+                                <TableCell>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                setId(item._id);
+                                                setFormUpdate({
+                                                    name: item.name,
+                                                    code: item.code,
+                                                    type: item.type,
+                                                    normal_balance: item.normal_balance,
+                                                    balance: item.balance,
+                                                    is_active: item.is_active
+                                                });
+                                                onOpenUpdate();
+                                            }}
+                                            className="text-blue-500 hover:text-blue-700 disabled:opacity-50"
+                                            disabled={updateLoading}
+                                        >
+                                            <RiEdit2Fill size={20} />
+                                        </button>
+                                    </div>
+                                </TableCell>
                             </TableRow>
                         )}
                     </TableBody>
@@ -392,11 +471,13 @@ const page = (props: Props) => {
                     >
                         <TableHeader>
                             <TableColumn key="name">NAMA</TableColumn>
-                            <TableColumn key="amount">JUMLAH</TableColumn>
-                            <TableColumn key="description">DESKRIPSI</TableColumn>
+                            <TableColumn key="code">KODE</TableColumn>
+                            <TableColumn key="type">TIPE</TableColumn>
+                            <TableColumn key="normal_balance">NORMAL BALANCE</TableColumn>
+                            <TableColumn key="balance">SALDO</TableColumn>
+                            <TableColumn key="is_active">STATUS</TableColumn>
                             <TableColumn key="createdAt">DIBUAT</TableColumn>
-                            <TableColumn key="updatedAt">DIPERBARUI</TableColumn>
-                            <TableColumn key="actions">AKSI</TableColumn>
+
                         </TableHeader>
                         <TableBody
                             items={currentItems}
@@ -406,37 +487,20 @@ const page = (props: Props) => {
                             {(item) => (
                                 <TableRow key={item?._id}>
                                     <TableCell>{item.name}</TableCell>
-                                    <TableCell>{formatCurrency(item?.amount)}</TableCell>
-                                    <TableCell>{item?.description}</TableCell>
-                                    <TableCell>{formatDate(item?.createdAt)}</TableCell>
-                                    <TableCell>{formatDate(item?.updatedAt)}</TableCell>
+                                    <TableCell>{item.code}</TableCell>
+                                    <TableCell>{item.type}</TableCell>
+                                    <TableCell>{item.normal_balance}</TableCell>
+                                    <TableCell>{formatCurrency(item?.balance)}</TableCell>
                                     <TableCell>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => {
-                                                    setId(item._id);
-                                                    setFormUpdate({
-                                                        name: item.name,
-                                                        amount: item.amount,
-                                                        description: item.description
-                                                    });
-                                                    onOpenUpdate();
-                                                }}
-                                                className="text-blue-500 hover:text-blue-700"
-                                            >
-                                                <RiEdit2Fill size={20} />
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    setId(item._id);
-                                                    onOpenDelete();
-                                                }}
-                                                className="text-red-500 hover:text-red-700"
-                                            >
-                                                <IoMdTrash size={20} />
-                                            </button>
-                                        </div>
+                                        <span className={`px-2 py-1 rounded-full text-xs ${item?.is_active
+                                            ? 'bg-green-100 text-green-800'
+                                            : 'bg-red-100 text-red-800'
+                                            }`}>
+                                            {item?.is_active ? 'Aktif' : 'Tidak Aktif'}
+                                        </span>
                                     </TableCell>
+                                    <TableCell>{formatDate(item?.createdAt)}</TableCell>
+
                                 </TableRow>
                             )}
                         </TableBody>
@@ -445,58 +509,147 @@ const page = (props: Props) => {
 
 
             <ModalDefault isOpen={isOpen} onClose={onClose} >
-                <h1 className='text-xl font-bold my-4'>Tambah Saldo</h1>
-                <InputForm htmlFor="name" title="Name" type="text"
+                <h1 className='text-xl font-bold my-4'>Tambah Akun</h1>
+                <InputForm htmlFor="name" title="Nama Akun" type="text"
                     className='bg-slate-300 rounded-md mt-3 '
                     onChange={handleChange}
                     value={form.name} />
 
-                <InputForm htmlFor="amount" title="Jumlah" type="number"
+                <InputForm htmlFor="code" title="Kode Akun" type="text"
                     className='bg-slate-300 rounded-md '
                     onChange={handleChange}
-                    value={form.amount} />
+                    value={form.code} />
 
-                <InputForm htmlFor="description" title="Deskripsi" type="text"
+                <div className="mb-3">
+                    <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">Tipe Akun</label>
+                    <select
+                        id="type"
+                        name="type"
+                        value={form.type}
+                        onChange={handleChange}
+                        className="bg-slate-300 rounded-md w-full p-2 border border-gray-300"
+                    >
+                        <option value="">Pilih Tipe Akun</option>
+                        <option value="asset">Asset</option>
+                        <option value="liability">Liability</option>
+                        <option value="equity">Equity</option>
+                        <option value="revenue">Revenue</option>
+                        <option value="expense">Expense</option>
+                    </select>
+                </div>
+
+                <div className="mb-3">
+                    <label htmlFor="normal_balance" className="block text-sm font-medium text-gray-700 mb-1">Normal Balance</label>
+                    <select
+                        id="normal_balance"
+                        name="normal_balance"
+                        value={form.normal_balance}
+                        onChange={handleChange}
+                        className="bg-slate-300 rounded-md w-full p-2 border border-gray-300"
+                    >
+                        <option value="">Pilih Normal Balance</option>
+                        <option value="debit">Debit</option>
+                        <option value="credit">Credit</option>
+                    </select>
+                </div>
+
+                <InputForm htmlFor="balance" title="Saldo Awal" type="number"
                     className='bg-slate-300 rounded-md '
                     onChange={handleChange}
-                    value={form.description} />
+                    value={form.balance} />
+
+                <div className="mb-3">
+                    <label className="flex items-center">
+                        <input
+                            type="checkbox"
+                            name="is_active"
+                            checked={form.is_active}
+                            onChange={handleChange}
+                            className="mr-2"
+                        />
+                        <span className="text-sm font-medium text-gray-700">Akun Aktif</span>
+                    </label>
+                </div>
 
                 <div className="flex justify-end gap-2">
                     <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={onClose}>Batal</ButtonSecondary>
-                    <ButtonPrimary className='py-1 px-2 rounded-xl' onClick={handleCreateSaldo}>Simpan</ButtonPrimary>
+                    <ButtonPrimary className='py-1 px-2 rounded-xl' onClick={handleCreateAccount} disabled={createLoading}>
+                        {createLoading ? 'Menyimpan...' : 'Simpan'}
+                    </ButtonPrimary>
                 </div>
             </ModalDefault>
 
             <ModalDefault isOpen={isOpenUpdate} onClose={onCloseUpdate} >
-                <h1 className='text-xl font-bold my-4'>Edit Saldo</h1>
-                <InputForm htmlFor="name" title="Name" type="text"
+                <h1 className='text-xl font-bold my-4'>Edit Akun</h1>
+                <InputForm htmlFor="name" title="Nama Akun" type="text"
                     className='bg-slate-300 rounded-md mt-3 '
                     onChange={handleChangeUpdate}
                     value={formUpdate.name} />
 
-                <InputForm htmlFor="amount" title="Jumlah" type="number"
+                <InputForm htmlFor="code" title="Kode Akun" type="text"
                     className='bg-slate-300 rounded-md '
                     onChange={handleChangeUpdate}
-                    value={formUpdate.amount} />
+                    value={formUpdate.code} />
 
-                <InputForm htmlFor="description" title="Deskripsi" type="text"
+                <div className="mb-3">
+                    <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">Tipe Akun</label>
+                    <select
+                        id="type"
+                        name="type"
+                        value={formUpdate.type}
+                        onChange={handleChangeUpdate}
+                        className="bg-slate-300 rounded-md w-full p-2 border border-gray-300"
+                    >
+                        <option value="">Pilih Tipe Akun</option>
+                        <option value="asset">Asset</option>
+                        <option value="liability">Liability</option>
+                        <option value="equity">Equity</option>
+                        <option value="revenue">Revenue</option>
+                        <option value="expense">Expense</option>
+                    </select>
+                </div>
+
+                <div className="mb-3">
+                    <label htmlFor="normal_balance" className="block text-sm font-medium text-gray-700 mb-1">Normal Balance</label>
+                    <select
+                        id="normal_balance"
+                        name="normal_balance"
+                        value={formUpdate.normal_balance}
+                        onChange={handleChangeUpdate}
+                        className="bg-slate-300 rounded-md w-full p-2 border border-gray-300"
+                    >
+                        <option value="">Pilih Normal Balance</option>
+                        <option value="debit">Debit</option>
+                        <option value="credit">Credit</option>
+                    </select>
+                </div>
+
+                <InputForm htmlFor="balance" title="Saldo Awal" type="number"
                     className='bg-slate-300 rounded-md '
                     onChange={handleChangeUpdate}
-                    value={formUpdate.description} />
+                    value={formUpdate.balance} />
+
+                <div className="mb-3">
+                    <label className="flex items-center">
+                        <input
+                            type="checkbox"
+                            name="is_active"
+                            checked={formUpdate.is_active}
+                            onChange={handleChangeUpdate}
+                            className="mr-2"
+                        />
+                        <span className="text-sm font-medium text-gray-700">Akun Aktif</span>
+                    </label>
+                </div>
 
                 <div className="flex justify-end gap-2">
-                    <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={onClose}>Batal</ButtonSecondary>
-                    <ButtonPrimary className='py-1 px-2 rounded-xl' onClick={handleEditSaldo}>Simpan</ButtonPrimary>
+                    <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={onCloseUpdate}>Batal</ButtonSecondary>
+                    <ButtonPrimary className='py-1 px-2 rounded-xl' onClick={handleEditAccount} disabled={updateLoading}>
+                        {updateLoading ? 'Mengubah...' : 'Simpan'}
+                    </ButtonPrimary>
                 </div>
             </ModalDefault>
 
-            <ModalAlert isOpen={isOpenDelete} onClose={onCloseDelete}>
-                <h1>Apakah anda yakin ingin menghapus saldo ini?</h1>
-                <div className="flex justify-end gap-2">
-                    <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={onCloseDelete}>Batal</ButtonSecondary>
-                    <ButtonPrimary className='py-1 px-2 rounded-xl' onClick={handleDeleteSaldo}>Hapus</ButtonPrimary>
-                </div>
-            </ModalAlert>
 
         </DefaultLayout>
     )

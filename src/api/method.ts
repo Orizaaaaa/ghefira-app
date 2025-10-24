@@ -260,3 +260,44 @@ export const getCapsterHours = (id: string, callback: any) => {
         });
 }
 
+// accounting accounts
+export const getAllAccountingAccounts = async () => {
+    try {
+        const res = await axiosInterceptor.get('/accounting/accounts');
+        return res.data; 
+        console.log(res.data);
+        // ✅ return data
+    } catch (err) {
+        console.error(err);
+        return []; // atau null, tergantung kebutuhan
+    }
+};
+
+export const createAccountingAccount = async (form: any, callback: any) => {
+    await axiosInterceptor.post('/accounting/accounts', form)
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            console.log(err);
+        });
+}
+
+export const updateAccountingAccount = async (id: any, form: any, callback: any) => {
+    await axiosInterceptor.put(`/accounting/accounts/${id}`, form)
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            console.log(err);
+        });
+}
+
+export const deleteAccountingAccount = async (id: any) => {
+    try {
+        const result = await axiosInterceptor.delete(`/accounting/accounts/${id}`)
+        return result.data; // ✅ return data langsung
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+}
+
