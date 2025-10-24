@@ -1,6 +1,6 @@
 'use client';
 
-import { getSumaryMounth, getSummaryPerMounth } from '@/api/method';
+import { getSumaryMounth, getSummaryPerMounth, getAllJournalEntries } from '@/api/method';
 import { man } from '@/app/image';
 import DefaultLayout from '@/components/layouts/DefaultLayout';
 import { formatRupiah } from '@/utils/helper';
@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { FaMoneyBillTransfer } from 'react-icons/fa6';
 import { ImBook } from 'react-icons/im';
 import { IoPeople } from 'react-icons/io5';
+import { BiTrendingDown, BiTrendingUp } from 'react-icons/bi';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { log } from 'util';
 
@@ -35,6 +36,10 @@ function Page() {
     const [totalDenda, setTotalDenda] = useState(0);
     const [cart, setCart] = useState([])
     const [monthlyData, setMonthlyData] = useState({} as any);
+    const [journalData, setJournalData] = useState([] as any);
+    const [totalDebit, setTotalDebit] = useState(0);
+    const [totalCredit, setTotalCredit] = useState(0);
+    const [chartData, setChartData] = useState([] as any);
 
     const data = [
         { date: 'May 15', value: 100 },
@@ -82,6 +87,48 @@ function Page() {
             await getSumaryMounth(currentMonth, currentYear, (res: any) => {
                 setMonthlyData(res); // <-- data bulanan, bisa untuk card ringkasan
             });
+
+            // Fetch journal entries for debit/credit data
+            const journalResult = await getAllJournalEntries();
+            if (journalResult && journalResult.data && journalResult.data.journalEntries) {
+                const entries = journalResult.data.journalEntries.filter((entry: any) => entry.status === 'posted');
+                setJournalData(entries);
+
+                // Calculate totals
+                let debitTotal = 0;
+                let creditTotal = 0;
+                const monthlyTransactionData: any = {};
+
+                entries.forEach((entry: any) => {
+                    entry.entries.forEach((journalEntry: any) => {
+                        debitTotal += journalEntry.debit;
+                        creditTotal += journalEntry.credit;
+
+                        // Group by month for chart
+                        const date = new Date(entry.transaction_date);
+                        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                        const monthName = date.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
+                        
+                        if (!monthlyTransactionData[monthKey]) {
+                            monthlyTransactionData[monthKey] = { 
+                                month: monthName, 
+                                debit: 0, 
+                                credit: 0 
+                            };
+                        }
+                        monthlyTransactionData[monthKey].debit += journalEntry.debit;
+                        monthlyTransactionData[monthKey].credit += journalEntry.credit;
+                    });
+                });
+
+                setTotalDebit(debitTotal);
+                setTotalCredit(creditTotal);
+                setChartData(Object.values(monthlyTransactionData).sort((a: any, b: any) => {
+                    const dateA = new Date(a.month);
+                    const dateB = new Date(b.month);
+                    return dateA.getTime() - dateB.getTime();
+                }));
+            }
 
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -190,81 +237,64 @@ function Page() {
                 </div>
 
                 <div className="col-span-2 gap-7 mt-7 md:mt-0 md:gap-0 flex flex-col items-stretch justify-between">
-                    <div className="h-[240px] bg-gradient-to-r from-green-400 to-emerald-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300  flex flex-col group">
+                    {/* Debit Card */}
+                    <div className="h-[240px] bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col group">
                         <div className="flex justify-between items-start">
                             <div>
-                                <p className="text-sm font-medium text-emerald-100">Total Saldo Masuk</p>
+                                <p className="text-sm font-medium text-blue-100">Total Debit</p>
                                 <div className="flex items-end gap-2 mt-2">
-                                    <h2 className="text-4xl font-bold">{formatRupiah(monthlyData?.income)}</h2>
+                                    <h2 className="text-4xl font-bold">{formatRupiah(totalDebit)}</h2>
                                 </div>
                             </div>
                             <div className="bg-white/20 rounded-full p-2 group-hover:bg-white/30 transition-all">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                </svg>
+                                <BiTrendingUp className="h-6 w-6" />
                             </div>
                         </div>
 
-                        <div className="mt-6">
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="text-sm font-medium text-emerald-100">Target</span>
-                                <span className="text-sm font-bold">{percentage}%</span>
-                            </div>
-                            <div className="relative pt-1">
-                                <div className="overflow-hidden h-3 mb-4 text-xs flex rounded-full bg-white/20">
-                                    <div
-                                        style={{ width: `${percentage}%` }}
-                                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-white transition-all duration-500 ease-out"
-                                    ></div>
-                                </div>
-                            </div>
+                        <div className="mt-6 flex-grow">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={chartData}>
+                                    <Line
+                                        type="monotone"
+                                        dataKey="debit"
+                                        stroke="#3b82f6"
+                                        strokeWidth={3}
+                                        dot={{ r: 4 }}
+                                        activeDot={{ r: 6 }}
+                                        animationDuration={2000}
+                                    />
+                                </LineChart>
+                            </ResponsiveContainer>
                         </div>
                     </div>
 
-                    {/* Saldo Keluar Card - Responsive */}
-                    <div className="h-[240px] bg-gradient-to-r from-rose-500 to-pink-600 rounded-2xl p-4 md:p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 group flex flex-col justify-between">
-                        <div>
-                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-3 md:mb-4">
-                                <div className="flex-1">
-                                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                                        <p className="text-xs md:text-sm font-medium text-rose-100">Total Saldo Keluar</p>
-                                        <div className="text-xs px-2 py-1 bg-white/20 rounded-full flex items-center gap-1 w-fit">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-                                            </svg>
-                                            <span>9%</span>
-                                        </div>
-                                    </div>
-                                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">{formatRupiah(monthlyData?.expense)}</h2>
+                    {/* Credit Card */}
+                    <div className="h-[240px] bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col group">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-sm font-medium text-purple-100">Total Credit</p>
+                                <div className="flex items-end gap-2 mt-2">
+                                    <h2 className="text-4xl font-bold">{formatRupiah(totalCredit)}</h2>
                                 </div>
-                                <div className="flex justify-end sm:block">
-                                    <div className="bg-white/10 p-1 md:p-2 rounded-lg w-fit">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
-                                </div>
+                            </div>
+                            <div className="bg-white/20 rounded-full p-2 group-hover:bg-white/30 transition-all">
+                                <BiTrendingDown className="h-6 w-6" />
                             </div>
                         </div>
 
-                        {/* Chart Paling Bawah */}
-                        <div className="w-full">
-                            <ResponsiveContainer width="100%" height={60}>
-                                <BarChart data={dataSideChart}>
-                                    <defs>
-                                        <linearGradient id="colorRedBar" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#ff8a8a" stopOpacity={0.9} />
-                                            <stop offset="95%" stopColor="#ff5252" stopOpacity={0.9} />
-                                        </linearGradient>
-                                    </defs>
-                                    <Bar
-                                        dataKey="value"
-                                        fill="url(#colorRedBar)"
-                                        radius={[4, 4, 0, 0]}
-                                        barSize={6}
+                        <div className="mt-6 flex-grow">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={chartData}>
+                                    <Line
+                                        type="monotone"
+                                        dataKey="credit"
+                                        stroke="#8b5cf6"
+                                        strokeWidth={3}
+                                        dot={{ r: 4 }}
+                                        activeDot={{ r: 6 }}
                                         animationDuration={2000}
                                     />
-                                </BarChart>
+                                </LineChart>
                             </ResponsiveContainer>
                         </div>
                     </div>
