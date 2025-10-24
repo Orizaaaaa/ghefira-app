@@ -26,14 +26,15 @@ interface AccountingAccount {
     code: string;
     type: string;
     normal_balance: string;
-    balance: number;
+    description?: string;
+    balance?: number;
     user: string;
-    is_active: boolean;
+    is_active?: boolean;
     createdAt: string;
     updatedAt: string;
     __v: number;
-    display_balance: number;
-    accounting_balance: number;
+    display_balance?: number;
+    accounting_balance?: number;
 }
 
 interface ApiResponse {
@@ -78,8 +79,7 @@ const page = (props: Props) => {
         code: '',
         type: '',
         normal_balance: '',
-        balance: '',
-        is_active: true
+        description: ''
     });
 
     const [formUpdate, setFormUpdate] = useState({
@@ -87,8 +87,7 @@ const page = (props: Props) => {
         code: '',
         type: '',
         normal_balance: '',
-        balance: 0,
-        is_active: true
+        description: ''
     });
 
     const dataSideChart = Array.from({ length: 30 }, () => ({
@@ -96,34 +95,13 @@ const page = (props: Props) => {
     }));
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value, type } = e.target;
-
-        if (type === 'checkbox') {
-            const checked = (e.target as HTMLInputElement).checked;
-            setForm({ ...form, [name]: checked });
-        } else {
-            // Hanya ambil angka untuk balance
-            const sanitizedValue = name === "balance"
-                ? value.replace(/[^0-9]/g, '')
-                : value;
-
-            setForm({ ...form, [name]: sanitizedValue });
-        }
+        const { name, value } = e.target;
+        setForm({ ...form, [name]: value });
     };
 
     const handleChangeUpdate = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value, type } = e.target;
-
-        if (type === 'checkbox') {
-            const checked = (e.target as HTMLInputElement).checked;
-            setFormUpdate({ ...formUpdate, [name]: checked });
-        } else {
-            const sanitizedValue = name === "balance"
-                ? value.replace(/[^0-9]/g, '')
-                : value;
-
-            setFormUpdate({ ...formUpdate, [name]: sanitizedValue });
-        }
+        const { name, value } = e.target;
+        setFormUpdate({ ...formUpdate, [name]: value });
     };
 
 
@@ -222,8 +200,7 @@ const page = (props: Props) => {
                     code: '',
                     type: '',
                     normal_balance: '',
-                    balance: '',
-                    is_active: true
+                    description: ''
                 });
             });
         } catch (error) {
@@ -253,8 +230,7 @@ const page = (props: Props) => {
                     code: '',
                     type: '',
                     normal_balance: '',
-                    balance: 0,
-                    is_active: true
+                    description: ''
                 });
             });
         } catch (error) {
@@ -271,7 +247,7 @@ const page = (props: Props) => {
 
     return (
         <DefaultLayout>
-            <div className={` flex justify-end mb-4 gap-3 ${role !== 'admin' && 'hidden'}`}>
+            <div className={` flex justify-end mb-4 gap-3 ${role === 'admin' && 'hidden'}`}>
                 <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={openModalCreate}>
                     {createLoading ? 'Menyimpan...' : '+ Tambah Akun'}
                 </ButtonSecondary>
@@ -403,7 +379,7 @@ const page = (props: Props) => {
                                 <TableCell>{item?.code}</TableCell>
                                 <TableCell>{item?.type}</TableCell>
                                 <TableCell>{item?.normal_balance}</TableCell>
-                                <TableCell>{formatCurrency(item?.balance)}</TableCell>
+                                <TableCell>{formatCurrency(item?.balance ?? 0)}</TableCell>
                                 <TableCell>
                                     <span className={`px-2 py-1 rounded-full text-xs ${item?.is_active
                                         ? 'bg-green-100 text-green-800'
@@ -423,8 +399,7 @@ const page = (props: Props) => {
                                                     code: item.code,
                                                     type: item.type,
                                                     normal_balance: item.normal_balance,
-                                                    balance: item.balance,
-                                                    is_active: item.is_active
+                                                    description: item.description || ''
                                                 });
                                                 onOpenUpdate();
                                             }}
@@ -490,7 +465,7 @@ const page = (props: Props) => {
                                     <TableCell>{item.code}</TableCell>
                                     <TableCell>{item.type}</TableCell>
                                     <TableCell>{item.normal_balance}</TableCell>
-                                    <TableCell>{formatCurrency(item?.balance)}</TableCell>
+                                    <TableCell>{formatCurrency(item?.balance ?? 0)}</TableCell>
                                     <TableCell>
                                         <span className={`px-2 py-1 rounded-full text-xs ${item?.is_active
                                             ? 'bg-green-100 text-green-800'
@@ -553,23 +528,10 @@ const page = (props: Props) => {
                     </select>
                 </div>
 
-                <InputForm htmlFor="balance" title="Saldo Awal" type="number"
+                <InputForm htmlFor="description" title="Deskripsi" type="text"
                     className='bg-slate-300 rounded-md '
                     onChange={handleChange}
-                    value={form.balance} />
-
-                <div className="mb-3">
-                    <label className="flex items-center">
-                        <input
-                            type="checkbox"
-                            name="is_active"
-                            checked={form.is_active}
-                            onChange={handleChange}
-                            className="mr-2"
-                        />
-                        <span className="text-sm font-medium text-gray-700">Akun Aktif</span>
-                    </label>
-                </div>
+                    value={form.description} />
 
                 <div className="flex justify-end gap-2">
                     <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={onClose}>Batal</ButtonSecondary>
@@ -624,23 +586,10 @@ const page = (props: Props) => {
                     </select>
                 </div>
 
-                <InputForm htmlFor="balance" title="Saldo Awal" type="number"
+                <InputForm htmlFor="description" title="Deskripsi" type="text"
                     className='bg-slate-300 rounded-md '
                     onChange={handleChangeUpdate}
-                    value={formUpdate.balance} />
-
-                <div className="mb-3">
-                    <label className="flex items-center">
-                        <input
-                            type="checkbox"
-                            name="is_active"
-                            checked={formUpdate.is_active}
-                            onChange={handleChangeUpdate}
-                            className="mr-2"
-                        />
-                        <span className="text-sm font-medium text-gray-700">Akun Aktif</span>
-                    </label>
-                </div>
+                    value={formUpdate.description} />
 
                 <div className="flex justify-end gap-2">
                     <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={onCloseUpdate}>Batal</ButtonSecondary>

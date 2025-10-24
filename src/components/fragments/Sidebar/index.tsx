@@ -130,7 +130,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             <ul className="mb-6 flex flex-col gap-1.5">
               {/* <!-- Menu Item Dashboard --> */}
               <NavigationList icon={<MdDashboard size={24} />} title="Home" pathname="/admin/dashboard" />
-              <NavigationList icon={<FaMoneyBillTransfer size={24} />} title="Saldo" pathname="/admin/saldo" />
+              <NavigationList icon={<FaMoneyBillTransfer size={24} />} title="Account" pathname="/admin/saldo" />
               <NavigationList icon={<IoNewspaperOutline size={24} />} title="Transaksi" pathname="/admin/transaction" />
               <NavigationList icon={<MdOutlineCategory size={24} />} title="Kategori" pathname="/admin/category" />
               <ButtonSecondary className="w-full py-1 rounded-md font-medium mt-20 cursor-pointer" onClick={handleLogout}>

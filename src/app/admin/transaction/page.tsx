@@ -1,5 +1,5 @@
 'use client'
-import { createTransactionModel, createTransactionTrainModel, deleteTransaction, getAllCategory, getAllSaldo, getAllTransaction, updateTransaction } from '@/api/method'
+import { createJournalEntry, deleteJournalEntry, getAllJournalEntries, updateJournalEntry, downloadJournalEntries } from '@/api/method'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import InputForm from '@/components/elements/input/InputForm'
@@ -7,131 +7,123 @@ import ModalDefault from '@/components/fragments/modal/modal'
 import ModalAlert from '@/components/fragments/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
 import { useAuth } from '@/hook/AuthContext'
-import { formatDate, formatDateWithDays, formatRupiah } from '@/utils/helper'
-import { Autocomplete, AutocompleteItem, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@heroui/react'
+import { formatDate, formatRupiah } from '@/utils/helper'
+import { Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@heroui/react'
 import React, { useEffect, useState, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import { BiTrendingDown, BiTrendingUp } from 'react-icons/bi'
-import { BsBox, BsLayers } from 'react-icons/bs'
-import { FaArrowDown, FaArrowUp } from 'react-icons/fa6'
+import { BsBox } from 'react-icons/bs'
 import { IoMdTrash } from 'react-icons/io'
-import { LuDatabase } from 'react-icons/lu'
 import { RiEdit2Fill } from 'react-icons/ri'
-import { Cell, Pie, PieChart, PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts'
+import { FiDownload } from 'react-icons/fi'
 
-interface User {
+interface Account {
     _id: string;
     name: string;
-    email: string;
+    code: string;
+    type: string;
+    display_balance: number | null;
+    id: string;
 }
 
-interface Category {
-    _id: string;
-    name: string;
-}
-
-interface Saldo {
-    _id: string;
-    name: string;
-    amount: number;
-}
-
-interface Transaction {
-    _id: string;
-    user: User;
-    category: Category;
-    saldo: Saldo;
-    amount: number;
+interface JournalEntryItem {
+    account: Account;
+    debit: number;
+    credit: number;
     description: string;
-    type: 'income' | 'expense';
+    _id: string;
+}
+
+interface JournalEntry {
+    _id: string;
+    transaction_date: string;
+    description: string;
+    entries: JournalEntryItem[];
+    user: string;
+    status: string;
+    predicted_category: string;
+    ml_confidence: number;
     createdAt: string;
     updatedAt: string;
     __v: number;
 }
 
-interface PaginationData {
-    total: number;
-    page: number;
-    limit: number;
-    pages: number;
-}
-
-interface Meta {
-    message: string;
+interface ApiResponse {
     code: number;
     status: string;
-    pagination: PaginationData;
+    data: {
+        journalEntries: JournalEntry[];
+    };
 }
 
-interface ApiResponse {
-    meta: Meta;
-    data: Transaction[];
+interface CreateJournalResponse {
+    code: number;
+    status: string;
+    data: {
+        journalEntry: JournalEntry;
+        prediction: {
+            category: string;
+            confidence: number;
+            auto_categorized: boolean;
+        };
+        message: string;
+    };
 }
 
 type Props = {}
 
 const Page = (props: Props) => {
-
     const { role } = useAuth();
     const [id, setId] = useState('');
-    const [transaction, setTransaction] = useState<ApiResponse | null>(null);
-    const [category, setCategory] = useState([]);
-    const [saldo, setSaldo] = useState([]);
+    const [journalEntries, setJournalEntries] = useState<ApiResponse | null>(null);
+    const [journalData, setJournalData] = useState<JournalEntry[]>([]);
     const [loading, setLoading] = useState(false);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isOpenUpdate, onOpen: onOpenUpdate, onClose: onCloseUpdate } = useDisclosure();
-    const { isOpen: isOpenDataset, onOpen: onOpenDataset, onClose: onCloseDataset } = useDisclosure();
     const { isOpen: isOpenDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
+    const { isOpen: isOpenDownload, onOpen: onOpenDownload, onClose: onCloseDownload } = useDisclosure();
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
     const [form, setForm] = useState({
-        user: '',
-        saldo: '',
-        amount: '',
         description: '',
+        amount: '',
         type: '',
+        date: ''
     });
 
-
-    const [formDataset, setFormDataset] = useState({
-        user: '',
-        category: '',
-        saldo: '',
-        amount: '',
-        description: '',
-        type: ''
-    });
+    const [downloadLoading, setDownloadLoading] = useState(false);
 
     const [formUpdate, setFormUpdate] = useState({
-        user: '',
-        saldo: '',
-        amount: '',
+        transaction_date: '',
         description: '',
-        type: '',
+        entries: [
+            {
+                account: '',
+                debit: '',
+                credit: '',
+                description: ''
+            }
+        ]
     })
 
-    const totalItems = transaction?.meta?.pagination?.total || 0;
+    const totalItems = Array.isArray(journalData) ? journalData.length : 0;
     // Hitung total halaman asli
     const calculatedTotalPages = Math.ceil(totalItems / rowsPerPage);
     const totalPages = Math.max(calculatedTotalPages, 20);
 
     // Get current page items
     const currentItems = useMemo(() => {
-        if (!transaction?.data) return [];
+        if (!Array.isArray(journalData)) return [];
         const start = (currentPage - 1) * rowsPerPage;
         const end = start + rowsPerPage;
-        return transaction.data.slice(start, end);
-    }, [currentPage, transaction?.data, rowsPerPage]);
+        return journalData.slice(start, end);
+    }, [currentPage, journalData, rowsPerPage]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
-    };
-
-    const handleChangeDataset = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormDataset({ ...formDataset, [e.target.name]: e.target.value });
     };
 
     const handleChangeUpdate = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,185 +142,174 @@ const Page = (props: Props) => {
         onOpenDelete();
     }
 
+    const handleOpenDownload = () => {
+        onOpenDownload();
+    }
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const resultCategory = await getAllCategory();
-            const resultSaldo = await getAllSaldo();
-            const result = await getAllTransaction();
-            setCategory(resultCategory.data);
-            setSaldo(resultSaldo.data);
-            setTransaction(result);
+            const result = await getAllJournalEntries();
+            console.log('Journal Entries Response:', result);
+            setJournalEntries(result);
+
+            // Handle different response structures and filter by status "posted"
+            let entries = [];
+            if (result && result.data && result.data.journalEntries && Array.isArray(result.data.journalEntries)) {
+                entries = result.data.journalEntries;
+            } else if (result && Array.isArray(result)) {
+                entries = result;
+            } else {
+                console.warn('Unexpected API response structure:', result);
+                entries = [];
+            }
+
+            // Filter only entries with status "posted"
+            const postedEntries = entries.filter((entry: JournalEntry) => entry.status === 'posted');
+            setJournalData(postedEntries);
         } catch (error) {
             console.error('Error fetching data:', error);
+            setJournalData([]);
         } finally {
             setLoading(false);
         }
     }
 
     useEffect(() => {
-        const id = localStorage.getItem('id');
-        if (id) {
-            setForm(prev => ({
-                ...prev,
-                user: id
-            }));
-            setFormDataset(prev => ({
-                ...prev,
-                user: id
-            }));
-        }
         fetchData();
     }, []);
 
+    const handleCreateJournalEntry = async () => {
+        const { description, amount, type, date } = form;
 
-    const handleSelectionChangeDataset = (key: string | null, field: 'saldo' | 'type' | 'category') => {
-        if (!key) return;
-        setFormDataset(prev => ({ ...prev, [field]: key }));
-    };
-
-    const handleSelectionChange = (key: string | null, field: 'saldo' | 'type') => {
-        if (!key) return;
-        setForm((prev) => ({
-            ...prev,
-            [field]: key
-        }));
-    };
-
-    const handleSelectionChangeUpdate = (key: string | null, field: 'saldo' | 'type') => {
-        if (!key) return;
-        setFormUpdate((prev) => ({
-            ...prev,
-            [field]: key
-        }));
-    };
-
-    const type = [
-        { label: "Pendapatan", key: "income" },
-        { label: "Pengeluaran", key: "expense" },
-    ];
-    const handleCreateTransaction = async () => {
-        const { user, saldo, amount, description, type } = form;
-
-        if (!user || !saldo || !amount || !description || !type) {
+        if (!description || !amount || !type || !date) {
             toast.error('Semua data harus diisi!');
             return;
         }
 
-        const toastId = toast.loading('Menyimpan transaksi...');
+        const toastId = toast.loading('Menyimpan jurnal...');
         try {
-            await createTransactionModel(form, (res: any) => {
-                console.log(res);
+            await createJournalEntry(form, (res: CreateJournalResponse) => {
+                console.log('Create Response:', res);
+
+                // Show prediction information if available
+                if (res.data && res.data.prediction) {
+                    const { category, confidence, auto_categorized } = res.data.prediction;
+                    if (auto_categorized) {
+                        toast.success(`Jurnal berhasil ditambahkan! Kategori diprediksi: ${category} (${Math.round(confidence * 100)}%)`, {
+                            id: toastId,
+                            duration: 5000
+                        });
+                    } else {
+                        toast.success('Jurnal berhasil ditambahkan!', { id: toastId });
+                    }
+                } else {
+                    toast.success('Jurnal berhasil ditambahkan!', { id: toastId });
+                }
+
                 fetchData();
                 onClose();
-                toast.success('Transaksi berhasil dibuat!', { id: toastId });
+                setForm({
+                    description: '',
+                    amount: '',
+                    type: '',
+                    date: ''
+                });
             });
         } catch (error) {
             console.error(error);
-            toast.error('Gagal membuat transaksi.', { id: toastId });
+            toast.error('Gagal menambahkan jurnal', { id: toastId });
         }
     };
 
-
     const handleDelete = async () => {
-        const toastId = toast.loading('Menghapus transaksi...');
+        const toastId = toast.loading('Menghapus jurnal...');
         try {
-            await deleteTransaction(id);
+            await deleteJournalEntry(id);
             fetchData();
             onCloseDelete();
-            toast.success('Transaksi berhasil dihapus!', { id: toastId });
+            toast.success('Jurnal berhasil dihapus!', { id: toastId });
         } catch (error) {
             console.error(error);
-            toast.error('Gagal menghapus transaksi.', { id: toastId });
+            toast.error('Gagal menghapus jurnal.', { id: toastId });
         }
     }
 
+    const handleDownload = async () => {
+        setDownloadLoading(true);
+        const toastId = toast.loading('Mengunduh data Excel...');
 
-    const handleEditTransaction = async () => {
-        const { user, saldo, amount, description, type } = formUpdate;
+        try {
+            await downloadJournalEntries((blob: Blob, err: any) => {
+                if (err) {
+                    toast.error('Gagal mengunduh data Excel', { id: toastId });
+                    console.error(err);
+                } else {
+                    // Create download link
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `journal-entries-${new Date().toISOString().split('T')[0]}.csv`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
 
-        if (!user || !saldo || !amount || !description || !type) {
+                    toast.success('Data Excel berhasil diunduh!', { id: toastId });
+                    onCloseDownload();
+                }
+            });
+        } catch (error) {
+            console.error(error);
+            toast.error('Gagal mengunduh data Excel', { id: toastId });
+        } finally {
+            setDownloadLoading(false);
+        }
+    };
+
+    const handleEditJournalEntry = async () => {
+        const { transaction_date, description, entries } = formUpdate;
+
+        if (!transaction_date || !description || !entries || entries.length === 0) {
             toast.error('Semua data harus diisi!');
             return;
         }
 
-        const toastId = toast.loading('Mengubah transaksi...');
+        const toastId = toast.loading('Mengubah jurnal...');
         try {
-            await updateTransaction(id, formUpdate, (res: any) => {
+            await updateJournalEntry(id, formUpdate, (res: any) => {
                 console.log(res);
                 fetchData();
-                toast.success('Transaksi berhasil diubah!', { id: toastId });
+                toast.success('Jurnal berhasil diubah!', { id: toastId });
                 onCloseUpdate();
             });
         } catch (error) {
             console.error(error);
-            toast.error('Gagal mengubah transaksi.', { id: toastId });
+            toast.error('Gagal mengubah jurnal.', { id: toastId });
         }
     };
-    let totalExpense = 0;
-    let totalIncome = 0;
 
-    transaction?.data.forEach(transaction => {
-        if (transaction.type === "expense") { // Typo: seharusnya "expense"
-            totalExpense += transaction.amount;
-        } else if (transaction.type === "income") {
-            totalIncome += transaction.amount;
-        }
+    // Calculate totals from journal entries
+    let totalDebit = 0;
+    let totalCredit = 0;
+
+    journalData.forEach(entry => {
+        entry.entries.forEach(journalEntry => {
+            totalDebit += journalEntry.debit;
+            totalCredit += journalEntry.credit;
+        });
     });
 
-    const handleSubmitModel = async () => {
-        const { user, category, saldo, amount, description, type } = formDataset;
-
-        if (!user || !category || !saldo || !amount || !description || !type) {
-            toast.error('Semua data harus diisi!');
-            return;
-        }
-
-        const loadingToast = toast.loading('Sedang menyimpan data...');
-        try {
-            await createTransactionTrainModel(formDataset, (result: any) => {
-                console.log(result);
-                setFormDataset({
-                    user: '',
-                    category: '',
-                    saldo: '',
-                    amount: '',
-                    description: '',
-                    type: ''
-                });
-                fetchData();
-                const id = localStorage.getItem('id');
-                if (id) {
-                    setForm(prev => ({ ...prev, user: id }));
-                }
-
-                toast.success('Data berhasil disimpan!', { id: loadingToast });
-                onCloseDataset();
-            });
-        } catch (error) {
-            console.error(error);
-            toast.error('Gagal menyimpan data!', { id: loadingToast });
-        }
-    };
-    console.log('transaksi', transaction?.data);
-    console.log('saldo', saldo);
-    console.log('category', category.length);
-    console.log('id', id);
-
-    console.log('alamak', formDataset);
-
-
-
+    console.log('Journal Entries:', journalData);
 
     return (
         <DefaultLayout>
-            <div className={`flex justify-end mb-4 gap-3  ${role !== 'admin' && 'hidden'}`}>
-                <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={handleOpenCreate}> + Tambah Transaksi </ButtonSecondary>
-                <ButtonSecondary className='py-1 px-2 rounded-xl flex items-center gap-2 justify-center' onClick={onOpenDataset} >
-                    <LuDatabase color='#5E936C' size={16} />
-                    Tambah Dataset
+            <div className={`flex justify-end mb-4 gap-3  ${role === 'admin' && 'hidden'}`}>
+                <ButtonSecondary className='py-1 px-2 rounded-xl flex items-center gap-2' onClick={handleOpenDownload}>
+                    <FiDownload  size={16} />
+                    Download Exceld
                 </ButtonSecondary>
+                <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={handleOpenCreate}> + Tambah Jurnal </ButtonSecondary>
             </div>
 
             <div className={`block md:flex justify-between items-center mb-5 `}>
@@ -344,8 +325,8 @@ const Page = (props: Props) => {
                             <BsBox className="text-blue-500 w-5 h-5" />
                         </div>
                         <div>
-                            <p className="text-gray-500 text-sm">Total Kategori</p>
-                            <h2 className="text-xl font-bold">{category.length}</h2>
+                            <p className="text-gray-500 text-sm">Total Jurnal</p>
+                            <h2 className="text-xl font-bold">{journalData.length}</h2>
                         </div>
                     </div>
                     <div className="bg-green-100 p-4 rounded-xl shadow flex items-center gap-4">
@@ -353,8 +334,8 @@ const Page = (props: Props) => {
                             <BiTrendingUp className="text-green-800 w-5 h-5" />
                         </div>
                         <div>
-                            <p className="text-green-800 text-sm">Pendapatan</p>
-                            <h2 className="text-lg font-semibold text-green-900">{formatRupiah(totalIncome)}</h2>
+                            <p className="text-green-800 text-sm">Total Debit</p>
+                            <h2 className="text-lg font-semibold text-green-900">{formatRupiah(totalDebit)}</h2>
                         </div>
                     </div>
                     <div className="bg-red-100 p-4 rounded-xl shadow flex items-center gap-4">
@@ -362,40 +343,34 @@ const Page = (props: Props) => {
                             <BiTrendingDown className="text-red-800 w-5 h-5" />
                         </div>
                         <div>
-                            <p className="text-red-800 text-sm">Pengeluaran</p>
-                            <h2 className="text-lg font-semibold text-red-900">{formatRupiah(totalExpense)}</h2>
+                            <p className="text-red-800 text-sm">Total Credit</p>
+                            <h2 className="text-lg font-semibold text-red-900">{formatRupiah(totalCredit)}</h2>
                         </div>
                     </div>
                 </div>
             </div>
-            {role !== 'admin' ? (
+            {role === 'admin' ? (
                 <Table
                     isCompact
                     className='mt-5'
-                    aria-label="Tabel Transaksi"
+                    aria-label="Tabel Jurnal"
                     bottomContent={
-                        <div className="flex w-full justify-between items-center">
-                            <div className="text-sm text-gray-600">
-                                Menampilkan {Math.min((currentPage - 1) * rowsPerPage + 1, totalItems)}-
-                                {Math.min(currentPage * rowsPerPage, totalItems)} dari {totalItems} transaksi
-                            </div>
-
-                            {totalPages > 1 && (
+                        totalPages > 1 && (
+                            <div className="flex w-full justify-center">
                                 <Pagination
                                     isCompact
                                     showControls
                                     showShadow
-                                    color="primary"
                                     classNames={{
                                         cursor: "bg-primaryGreen text-white cursor-pointer"
                                     }}
+                                    color="primary"
                                     page={currentPage}
                                     total={totalPages}
                                     onChange={setCurrentPage}
-                                    className="ml-auto"
                                 />
-                            )}
-                        </div>
+                            </div>
+                        )
                     }
                     classNames={{
                         wrapper: "min-h-[250px]",
@@ -404,37 +379,54 @@ const Page = (props: Props) => {
                     }}
                 >
                     <TableHeader>
+                        <TableColumn key="transaction_date">TANGGAL</TableColumn>
                         <TableColumn key="description">DESKRIPSI</TableColumn>
-                        <TableColumn key="category">KATEGORI</TableColumn>
-                        <TableColumn key="saldo">SALDO</TableColumn>
-                        <TableColumn key="amount">JUMLAH</TableColumn>
-                        <TableColumn key="type">JENIS</TableColumn>
-                        <TableColumn key="createdAt">TANGGAL</TableColumn>
-
+                        <TableColumn key="status">STATUS</TableColumn>
+                        <TableColumn key="entries">JURNAL</TableColumn>
+                        <TableColumn key="createdAt">DIBUAT</TableColumn>
                     </TableHeader>
                     <TableBody
                         items={currentItems}
                         isLoading={loading}
                         loadingContent={<span>Memuat data...</span>}
                     >
-                        {(item: Transaction) => (
+                        {(item: JournalEntry) => (
                             <TableRow key={item?._id}>
-                                <TableCell className='text-sm' >{item?.description}</TableCell>
-                                <TableCell className='text-sm'>{item?.category?.name}</TableCell>
-                                <TableCell className='text-sm'>{item?.saldo?.name}</TableCell>
-                                <TableCell className={item.type === 'income' ? 'text-green-600 text-sm' : 'text-red-600 text-sm'}>
-                                    {formatRupiah(item.amount)}
-                                </TableCell>
+                                <TableCell className='text-sm'>{formatDate(item.transaction_date)}</TableCell>
+                                <TableCell className='text-sm'>{item.description}</TableCell>
                                 <TableCell className='text-sm'>
-                                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs
-                                    ${item.type === 'income'
-                                            ? 'bg-green-100 text-green-800'
-                                            : 'bg-red-100 text-red-800'}`}>
-                                        {item.type === 'income' ? <FaArrowDown className="text-green-500" /> : <FaArrowUp className="text-red-500" />}
-                                        {item.type === 'income' ? 'Pendapatan' : 'Pengeluaran'}
+                                    <span className={`px-2 py-1 rounded-full text-xs ${item.status === 'posted'
+                                        ? 'bg-green-100 text-green-800'
+                                        : item.status === 'draft'
+                                            ? 'bg-yellow-100 text-yellow-800'
+                                            : 'bg-gray-100 text-gray-800'
+                                        }`}>
+                                        {item.status.toUpperCase()}
                                     </span>
                                 </TableCell>
-                                <TableCell className='text-sm'>{formatDateWithDays(item.createdAt)}</TableCell>
+                                <TableCell className='text-sm'>
+                                    <div className="space-y-1">
+                                        {item.entries.map((entry, index) => (
+                                            <div key={index} className="flex justify-between items-center text-xs bg-gray-50 p-2 rounded">
+                                                <div className="flex-1">
+                                                    <div className="font-medium">{entry.account.name}</div>
+                                                    <div className="text-gray-500">{entry.account.code}</div>
+                                                </div>
+                                                <div className="flex gap-4">
+                                                    <div className="text-right">
+                                                        <div className="text-gray-500">Debit</div>
+                                                        <div className="font-medium">{entry.debit > 0 ? formatRupiah(entry.debit) : '-'}</div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <div className="text-gray-500">Credit</div>
+                                                        <div className="font-medium">{entry.credit > 0 ? formatRupiah(entry.credit) : '-'}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </TableCell>
+                                <TableCell className='text-sm'>{formatDate(item.createdAt)}</TableCell>
                             </TableRow>
                         )}
                     </TableBody>
@@ -444,12 +436,12 @@ const Page = (props: Props) => {
                 <Table
                     isCompact
                     className='mt-5'
-                    aria-label="Tabel Transaksi"
+                    aria-label="Tabel Jurnal"
                     bottomContent={
                         <div className="flex w-full justify-between items-center">
                             <div className="text-sm text-gray-600">
                                 Menampilkan {Math.min((currentPage - 1) * rowsPerPage + 1, totalItems)}-
-                                {Math.min(currentPage * rowsPerPage, totalItems)} dari {totalItems} transaksi
+                                {Math.min(currentPage * rowsPerPage, totalItems)} dari {totalItems} jurnal
                             </div>
 
                             {totalPages > 1 && (
@@ -476,12 +468,10 @@ const Page = (props: Props) => {
                     }}
                 >
                     <TableHeader>
+                        <TableColumn key="transaction_date">TANGGAL</TableColumn>
                         <TableColumn key="description">DESKRIPSI</TableColumn>
-                        <TableColumn key="category">KATEGORI</TableColumn>
-                        <TableColumn key="saldo">SALDO</TableColumn>
-                        <TableColumn key="amount">JUMLAH</TableColumn>
-                        <TableColumn key="type">JENIS</TableColumn>
-                        <TableColumn key="createdAt">TANGGAL</TableColumn>
+                        <TableColumn key="status">STATUS</TableColumn>
+                        <TableColumn key="entries">JURNAL</TableColumn>
                         <TableColumn key="actions">AKSI</TableColumn>
                     </TableHeader>
                     <TableBody
@@ -489,44 +479,63 @@ const Page = (props: Props) => {
                         isLoading={loading}
                         loadingContent={<span>Memuat data...</span>}
                     >
-                        {(item: Transaction) => (
+                        {(item: JournalEntry) => (
                             <TableRow key={item?._id}>
-                                <TableCell className='text-sm' >{item?.description}</TableCell>
-                                <TableCell className='text-sm'>{item?.category?.name}</TableCell>
-                                <TableCell className='text-sm'>{item?.saldo?.name}</TableCell>
-                                <TableCell className={item.type === 'income' ? 'text-green-600 text-sm' : 'text-red-600 text-sm'}>
-                                    {formatRupiah(item.amount)}
-                                </TableCell>
+                                <TableCell className='text-sm'>{formatDate(item.transaction_date)}</TableCell>
+                                <TableCell className='text-sm'>{item.description}</TableCell>
                                 <TableCell className='text-sm'>
-                                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs
-                                    ${item.type === 'income'
-                                            ? 'bg-green-100 text-green-800'
-                                            : 'bg-red-100 text-red-800'}`}>
-                                        {item.type === 'income' ? <FaArrowDown className="text-green-500" /> : <FaArrowUp className="text-red-500" />}
-                                        {item.type === 'income' ? 'Pendapatan' : 'Pengeluaran'}
+                                    <span className={`px-2 py-1 rounded-full text-xs ${item.status === 'posted'
+                                        ? 'bg-green-100 text-green-800'
+                                        : item.status === 'draft'
+                                            ? 'bg-yellow-100 text-yellow-800'
+                                            : 'bg-gray-100 text-gray-800'
+                                        }`}>
+                                        {item.status.toUpperCase()}
                                     </span>
                                 </TableCell>
-
-
-                                <TableCell className='text-sm'>{formatDateWithDays(item.createdAt)}</TableCell>
+                                <TableCell className='text-sm'>
+                                    <div className="space-y-1">
+                                        {item.entries.map((entry, index) => (
+                                            <div key={index} className="flex justify-between items-center text-xs bg-gray-50 p-2 rounded">
+                                                <div className="flex-1">
+                                                    <div className="font-medium">{entry.account.name}</div>
+                                                    <div className="text-gray-500">{entry.account.code}</div>
+                                                </div>
+                                                <div className="flex gap-4">
+                                                    <div className="text-right">
+                                                        <div className="text-gray-500">Debit</div>
+                                                        <div className="font-medium">{entry.debit > 0 ? formatRupiah(entry.debit) : '-'}</div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <div className="text-gray-500">Credit</div>
+                                                        <div className="font-medium">{entry.credit > 0 ? formatRupiah(entry.credit) : '-'}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </TableCell>
                                 <TableCell className='text-sm'>
                                     <div className="flex gap-2">
-                                        <button
+                                        {/* <button
                                             onClick={() => {
                                                 setId(item._id);
                                                 setFormUpdate({
-                                                    user: item.user._id,
-                                                    saldo: item.saldo._id,
-                                                    amount: item.amount.toString(),
+                                                    transaction_date: item.transaction_date,
                                                     description: item.description,
-                                                    type: item.type,
+                                                    entries: item.entries.map(entry => ({
+                                                        account: entry.account._id,
+                                                        debit: entry.debit.toString(),
+                                                        credit: entry.credit.toString(),
+                                                        description: entry.description
+                                                    }))
                                                 });
                                                 handleOpenUpdate();
                                             }}
                                             className="text-blue-500 hover:text-blue-700"
                                         >
                                             <RiEdit2Fill size={20} />
-                                        </button>
+                                        </button> */}
                                         <button
                                             onClick={() => {
                                                 setId(item._id);
@@ -544,43 +553,12 @@ const Page = (props: Props) => {
                 </Table>
             )}
 
-
             <ModalDefault isOpen={isOpen} onClose={onClose}>
-                <h1 className='text-xl font-bold my-4'>Tambah Transaksi</h1>
-                <div className="flex gap-4">
-                    <div className="">
-                        <h1>Pilih Saldo</h1>
-                        <Autocomplete
-                            className="w-full"
-                            variant='bordered'
-                            onSelectionChange={(e: any) => handleSelectionChange(e, 'saldo')}
-                            value={form.saldo}
-                        >
-                            {saldo.map((item: any) => (
-                                <AutocompleteItem textValue={item.name} key={item._id}>
-                                    {item.name} <span className='text-sm text-green-700'>{formatRupiah(item.amount)}</span>
-                                </AutocompleteItem>
-                            ))}
-                        </Autocomplete>
-                    </div>
-                    <div className="">
-                        <h1>Pilih Tipe</h1>
-                        <Autocomplete
-                            className="w-full"
-                            variant='bordered'
-                            onSelectionChange={(e: any) => handleSelectionChange(e, 'type')}
-                            value={form.type}
-                        >
-                            {type.map((item) => (
-                                <AutocompleteItem textValue={item.label} key={item.key}>{item.label}</AutocompleteItem>
-                            ))}
-                        </Autocomplete>
-                    </div>
-                </div>
+                <h1 className='text-xl font-bold my-4'>Tambah Jurnal</h1>
 
                 <InputForm
                     htmlFor="description"
-                    title="Description"
+                    title="Deskripsi"
                     type="text"
                     className="bg-slate-100 rounded-md"
                     onChange={handleChange}
@@ -589,168 +567,201 @@ const Page = (props: Props) => {
 
                 <InputForm
                     htmlFor="amount"
-                    title="Amount"
+                    title="Jumlah"
                     type="number"
                     className="bg-slate-100 rounded-md"
                     onChange={handleChange}
                     value={form.amount}
                 />
 
+                <div className="mb-3">
+                    <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">Tipe</label>
+                    <select
+                        id="type"
+                        name="type"
+                        value={form.type}
+                        onChange={handleChange}
+                        className="bg-slate-100 rounded-md w-full p-2 border border-gray-300"
+                    >
+                        <option value="">Pilih Tipe</option>
+                        <option value="revenue">income</option>
+                        <option value="expense">expense</option>
+                    </select>
+                </div>
+
+
+                <InputForm
+                    htmlFor="date"
+                    title="Tanggal"
+                    type="date"
+                    className="bg-slate-100 rounded-md"
+                    onChange={handleChange}
+                    value={form.date}
+                />
+
                 <div className="flex justify-end gap-2 mt-4">
                     <ButtonSecondary className="py-1 px-2 rounded-xl" onClick={onClose}>
                         Batal
                     </ButtonSecondary>
-                    <ButtonPrimary className="py-1 px-2 rounded-xl" onClick={handleCreateTransaction}>
+                    <ButtonPrimary className="py-1 px-2 rounded-xl" onClick={handleCreateJournalEntry}>
                         Simpan
                     </ButtonPrimary>
                 </div>
-            </ModalDefault>
-
-            <ModalDefault isOpen={isOpenDataset} onClose={onCloseDataset}>
-                <h1 className="text-2xl font-bold mb-4" >Tambah Dataset</h1>
-                <div className="flex gap-4">
-                    <div className="">
-                        <h1>Pilih Kategori</h1>
-                        <Autocomplete
-                            className="w-full"
-                            variant='bordered'
-                            onSelectionChange={(e: any) => handleSelectionChangeDataset(e, 'saldo')}
-                            value={formDataset.saldo}
-                        >
-                            {saldo.map((item: any) => (
-                                <AutocompleteItem textValue={item.name} key={item._id}>
-                                    {item.name} <span className='text-sm text-green-700'>{formatRupiah(item.amount)}</span>
-                                </AutocompleteItem>
-                            ))}
-                        </Autocomplete>
-                    </div>
-                    <div className="">
-                        <h1>Pilih Saldo</h1>
-                        <Autocomplete
-                            className="w-full"
-                            variant='bordered'
-                            onSelectionChange={(e: any) => handleSelectionChangeDataset(e, 'type')}
-                            value={formDataset.type}
-                        >
-                            {type.map((item) => (
-                                <AutocompleteItem textValue={item.label} key={item.key}>{item.label}</AutocompleteItem>
-                            ))}
-                        </Autocomplete>
-                    </div>
-                </div>
-                <InputForm htmlFor="amount" type="text" title='Jumlah'
-                    className='bg-slate-100 rounded-md mt-3 ' onChange={handleChangeDataset}
-                    value={formDataset.amount}
-                />
-
-                <InputForm htmlFor="description" type="text" title='Deskripsi'
-                    className='bg-slate-100 rounded-md mt-3 ' onChange={handleChangeDataset}
-                    value={formDataset.description}
-                />
-
-                <div className="">
-                    <h1>Pilih Kategori</h1>
-                    <Autocomplete
-                        className="w-full"
-                        variant='bordered'
-                        onSelectionChange={(e: any) => handleSelectionChangeDataset(e, 'category')}
-                        value={formDataset.category}
-                    >
-                        {category.map((item: any) => (
-                            <AutocompleteItem textValue={item.name} key={item._id}>{item.name}
-                                <span className={
-                                    `inline-block px-2 py-1 rounded-full text-xs  ml-2 ${item.type === 'income'
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-red-100 text-red-800'
-                                    }`}
-                                >
-                                    {item.type === 'income' ? 'Pendapatan' : 'Pengeluaran'}
-                                </span> </AutocompleteItem>
-                        ))}
-                    </Autocomplete>
-                </div>
-
-                <div className="flex justify-end gap-2 mt-4">
-                    <ButtonSecondary className="py-1 px-4 rounded-xl" onClick={onClose}>
-                        Batal
-                    </ButtonSecondary>
-                    <ButtonPrimary className="py-1 px-4 rounded-xl" onClick={handleSubmitModel} >
-                        Simpan
-                    </ButtonPrimary>
-                </div>
-
             </ModalDefault>
 
             <ModalDefault isOpen={isOpenUpdate} onClose={onCloseUpdate}>
-                <h1 className='text-xl font-bold my-4'>Edit Transaksi</h1>
-                <div className="flex gap-4">
-                    <div className="">
-                        <h1>Pilih Saldo</h1>
-                        <Autocomplete
-                            className="w-full"
-                            variant='bordered'
-                            onSelectionChange={(e: any) => handleSelectionChangeUpdate(e, 'saldo')}
-                            value={formUpdate.saldo}
-                            selectedKey={formUpdate.saldo}
-                        >
-                            {saldo.map((item: any) => (
-                                <AutocompleteItem textValue={item.name} key={item._id}>
-                                    {item.name} <span className='text-sm text-green-700'>{formatRupiah(item.amount)}</span>
-                                </AutocompleteItem>
-                            ))}
-                        </Autocomplete>
-                    </div>
-                    <div className="">
-                        <h1>Pilih Tipe</h1>
-                        <Autocomplete
-                            className="w-full"
-                            variant='bordered'
-                            onSelectionChange={(e: any) => handleSelectionChangeUpdate(e, 'type')}
-                            value={formUpdate.type}
-                            selectedKey={formUpdate.type}
-                        >
-                            {type.map((item) => (
-                                <AutocompleteItem textValue={item.label} key={item.key}>{item.label}</AutocompleteItem>
-                            ))}
-                        </Autocomplete>
-                    </div>
-                </div>
+                <h1 className='text-xl font-bold my-4'>Edit Jurnal</h1>
+
+                <InputForm
+                    htmlFor="transaction_date"
+                    title="Tanggal Transaksi"
+                    type="date"
+                    className="bg-slate-100 rounded-md"
+                    onChange={handleChangeUpdate}
+                    value={formUpdate.transaction_date}
+                />
 
                 <InputForm
                     htmlFor="description"
-                    title="Description"
+                    title="Deskripsi"
                     type="text"
-                    className="bg-slate-100 rounded-md py-5"
+                    className="bg-slate-100 rounded-md"
                     onChange={handleChangeUpdate}
                     value={formUpdate.description}
                 />
 
-                <InputForm
-                    htmlFor="amount"
-                    title="Amount"
-                    type="number"
-                    className="bg-slate-100 rounded-md py-5"
-                    onChange={handleChangeUpdate}
-                    value={formUpdate.amount}
-                />
+                <div className="mt-4">
+                    <h3 className="text-lg font-semibold mb-2">Entries Jurnal</h3>
+                    {formUpdate.entries.map((entry, index) => (
+                        <div key={index} className="border p-3 rounded-lg mb-3 bg-gray-50">
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Akun</label>
+                                    <select
+                                        className="w-full p-2 border rounded"
+                                        value={entry.account}
+                                        onChange={(e) => {
+                                            const newEntries = [...formUpdate.entries];
+                                            newEntries[index].account = e.target.value;
+                                            setFormUpdate({ ...formUpdate, entries: newEntries });
+                                        }}
+                                    >
+                                        <option value="">Pilih Akun</option>
+                                        {/* Add account options here */}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Deskripsi</label>
+                                    <input
+                                        type="text"
+                                        className="w-full p-2 border rounded"
+                                        value={entry.description}
+                                        onChange={(e) => {
+                                            const newEntries = [...formUpdate.entries];
+                                            newEntries[index].description = e.target.value;
+                                            setFormUpdate({ ...formUpdate, entries: newEntries });
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Debit</label>
+                                    <input
+                                        type="number"
+                                        className="w-full p-2 border rounded"
+                                        value={entry.debit}
+                                        onChange={(e) => {
+                                            const newEntries = [...formUpdate.entries];
+                                            newEntries[index].debit = e.target.value;
+                                            setFormUpdate({ ...formUpdate, entries: newEntries });
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Credit</label>
+                                    <input
+                                        type="number"
+                                        className="w-full p-2 border rounded"
+                                        value={entry.credit}
+                                        onChange={(e) => {
+                                            const newEntries = [...formUpdate.entries];
+                                            newEntries[index].credit = e.target.value;
+                                            setFormUpdate({ ...formUpdate, entries: newEntries });
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                    <button
+                        type="button"
+                        className="text-blue-500 text-sm"
+                        onClick={() => {
+                            setFormUpdate({
+                                ...formUpdate,
+                                entries: [...formUpdate.entries, {
+                                    account: '',
+                                    debit: '',
+                                    credit: '',
+                                    description: ''
+                                }]
+                            });
+                        }}
+                    >
+                        + Tambah Entry
+                    </button>
+                </div>
 
                 <div className="flex justify-end gap-2 mt-4">
                     <ButtonSecondary className="py-1 px-2 rounded-xl" onClick={onCloseUpdate}>
                         Batal
                     </ButtonSecondary>
-                    <ButtonPrimary className="py-1 px-2 rounded-xl" onClick={handleEditTransaction}>
+                    <ButtonPrimary className="py-1 px-2 rounded-xl" onClick={handleEditJournalEntry}>
                         Simpan
                     </ButtonPrimary>
                 </div>
             </ModalDefault>
 
             <ModalAlert isOpen={isOpenDelete} onClose={onCloseDelete}>
-                <h1>Apakah anda yakin ingin menghapus transaksi ini?</h1>
+                <h1>Apakah anda yakin ingin menghapus jurnal ini?</h1>
                 <div className="flex justify-end gap-2">
                     <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={onCloseDelete}>Batal</ButtonSecondary>
                     <ButtonPrimary className='py-1 px-2 rounded-xl' onClick={handleDelete}>Hapus</ButtonPrimary>
                 </div>
             </ModalAlert>
+
+            <ModalDefault isOpen={isOpenDownload} onClose={onCloseDownload}>
+                <h1 className='text-xl font-bold my-4'>Download Data Excel</h1>
+
+                <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
+                    <div className="flex items-center mb-2">
+                        <FiDownload className="text-blue-600 mr-2" size={20} />
+                        <h3 className="text-lg font-semibold text-blue-800">Export Journal Entries</h3>
+                    </div>
+                    <p className="text-sm text-blue-700">
+                        Klik tombol download untuk mengunduh data journal entries dalam format Excel.
+                    </p>
+                </div>
+
+                <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-md">
+                    <p className="text-sm text-gray-700">
+                        <strong>Informasi:</strong> File Excel akan berisi semua data journal entries yang tersimpan dalam sistem.
+                    </p>
+                </div>
+
+                <div className="flex justify-end gap-2">
+                    <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={onCloseDownload}>
+                        Batal
+                    </ButtonSecondary>
+                    <ButtonPrimary
+                        className='py-1 px-2 rounded-xl'
+                        onClick={handleDownload}
+                        disabled={downloadLoading}
+                    >
+                        {downloadLoading ? 'Mengunduh...' : 'Download Excel'}
+                    </ButtonPrimary>
+                </div>
+            </ModalDefault>
+
         </DefaultLayout>
     )
 }

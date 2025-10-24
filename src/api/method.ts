@@ -301,3 +301,57 @@ export const deleteAccountingAccount = async (id: any) => {
     }
 }
 
+// journal entries
+export const getAllJournalEntries = async () => {
+    try {
+        const res = await axiosInterceptor.get('/accounting/journal-entries');
+        return res.data; 
+        console.log(res.data);
+        // ✅ return data
+    } catch (err) {
+        console.error(err);
+        return []; // atau null, tergantung kebutuhan
+    }
+};
+
+export const createJournalEntry = async (form: any, callback: any) => {
+    await axiosInterceptor.post('/accounting/transactions', form)
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            console.log(err);
+        });
+}
+
+export const updateJournalEntry = async (id: any, form: any, callback: any) => {
+    await axiosInterceptor.put(`/accounting/journal-entries/${id}`, form)
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            console.log(err);
+        });
+}
+
+export const deleteJournalEntry = async (id: any) => {
+    try {
+        const result = await axiosInterceptor.delete(`/accounting/journal-entries/${id}`)
+        return result.data; // ✅ return data langsung
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+}
+
+// download journal entries as Excel
+export const downloadJournalEntries = async (callback: any) => {
+    await axiosInterceptor.get('/accounting/export/journal-entries', {
+        responseType: 'blob',
+    })
+    .then((result) => {
+        callback(result.data)
+    }).catch((err) => {
+        console.log(err);
+        callback(null, err);
+    });
+}
+
