@@ -355,3 +355,34 @@ export const downloadJournalEntries = async (callback: any) => {
     });
 }
 
+// reports
+export const getIncomeStatement = async () => {
+    try {
+        const res = await axiosInterceptor.get('/accounting/reports/income-statement');
+        return res.data;
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
+};
+
+export const getBalanceSheet = async () => {
+    try {
+        const res = await axiosInterceptor.get('/accounting/reports/balance-sheet');
+        return res.data;
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
+};
+
+export const getCashFlowStatement = async () => {
+    try {
+        const res = await axiosInterceptor.get('/accounting/reports/cash-flow');
+        return res.data;
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
+};
+

@@ -132,7 +132,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <NavigationList icon={<MdDashboard size={24} />} title="Home" pathname="/admin/dashboard" />
               <NavigationList icon={<FaMoneyBillTransfer size={24} />} title="Account" pathname="/admin/saldo" />
               <NavigationList icon={<IoNewspaperOutline size={24} />} title="Transaksi" pathname="/admin/transaction" />
-              <NavigationList icon={<MdOutlineCategory size={24} />} title="Kategori" pathname="/admin/category" />
+              <NavigationList icon={<MdOutlineCategory size={24} />} title="Report" pathname="/admin/report" />
               <ButtonSecondary className="w-full py-1 rounded-md font-medium mt-20 cursor-pointer" onClick={handleLogout}>
                 Logout
               </ButtonSecondary>

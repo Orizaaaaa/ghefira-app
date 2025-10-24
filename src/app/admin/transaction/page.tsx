@@ -306,8 +306,8 @@ const Page = (props: Props) => {
         <DefaultLayout>
             <div className={`flex justify-end mb-4 gap-3  ${role === 'admin' && 'hidden'}`}>
                 <ButtonSecondary className='py-1 px-2 rounded-xl flex items-center gap-2' onClick={handleOpenDownload}>
-                    <FiDownload  size={16} />
-                    Download Exceld
+                    <FiDownload size={16} />
+                    Download Excel
                 </ButtonSecondary>
                 <ButtonSecondary className='py-1 px-2 rounded-xl' onClick={handleOpenCreate}> + Tambah Jurnal </ButtonSecondary>
             </div>
@@ -584,7 +584,7 @@ const Page = (props: Props) => {
                         className="bg-slate-100 rounded-md w-full p-2 border border-gray-300"
                     >
                         <option value="">Pilih Tipe</option>
-                        <option value="revenue">income</option>
+                        <option value="income">income</option>
                         <option value="expense">expense</option>
                     </select>
                 </div>
