@@ -79,7 +79,7 @@ export default function Page() {
             }
         } catch (error) {
             console.error('Error fetching income statement:', error);
-            toast.error('Gagal memuat Income Statement');
+            toast.error('Gagal memuat Profit & Loss');
         } finally {
             setLoading(prev => ({ ...prev, income: false }));
         }
@@ -134,12 +134,12 @@ export default function Page() {
         <DefaultLayout>
             <div className="flex w-full flex-col">
                 <Tabs aria-label="Financial Reports" onSelectionChange={(key) => handleTabChange(key as string)}>
-                    <Tab key="income" title="Income Statement">
+                    <Tab key="income" title="Profit & Loss">
                         <Card>
                             <CardBody>
                                 <div className="space-y-6">
                                     <div className="text-center">
-                                        <h2 className="text-2xl font-bold text-gray-800">Income Statement</h2>
+                                        <h2 className="text-2xl font-bold text-gray-800">Profit & Loss</h2>
                                         <p className="text-gray-600">Laporan Laba Rugi</p>
                                     </div>
 
@@ -206,7 +206,7 @@ export default function Page() {
                                         </div>
                                     ) : (
                                         <div className="text-center py-8">
-                                            <p className="text-gray-500">Klik untuk memuat Income Statement</p>
+                                            <p className="text-gray-500">Klik untuk memuat Profit & Loss</p>
                                         </div>
                                     )}
                                 </div>
