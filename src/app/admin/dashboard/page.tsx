@@ -90,44 +90,103 @@ function Page() {
 
             // Fetch journal entries for debit/credit data
             const journalResult = await getAllJournalEntries();
+            console.log('Journal Result:', journalResult);
+            
             if (journalResult && journalResult.data && journalResult.data.journalEntries) {
                 const entries = journalResult.data.journalEntries.filter((entry: any) => entry.status === 'posted');
+                console.log('Filtered entries:', entries);
                 setJournalData(entries);
 
                 // Calculate totals
                 let debitTotal = 0;
                 let creditTotal = 0;
-                const monthlyTransactionData: any = {};
+                const dailyTransactionData: any = {};
 
-                entries.forEach((entry: any) => {
+                // Sort entries by transaction date
+                const sortedEntries = entries.sort((a: any, b: any) => 
+                    new Date(a.transaction_date).getTime() - new Date(b.transaction_date).getTime()
+                );
+
+                sortedEntries.forEach((entry: any) => {
+                    const date = new Date(entry.transaction_date);
+                    const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+                    const dateLabel = date.toLocaleDateString('id-ID', { 
+                        day: 'numeric', 
+                        month: 'short' 
+                    });
+                    
+                    if (!dailyTransactionData[dateKey]) {
+                        dailyTransactionData[dateKey] = { 
+                            date: dateLabel,
+                            fullDate: dateKey,
+                            debit: 0, 
+                            credit: 0,
+                            balance: 0
+                        };
+                    }
+
                     entry.entries.forEach((journalEntry: any) => {
+                        console.log('Processing journal entry:', {
+                            date: dateKey,
+                            account: journalEntry.account?.name,
+                            debit: journalEntry.debit,
+                            credit: journalEntry.credit
+                        });
+                        
                         debitTotal += journalEntry.debit;
                         creditTotal += journalEntry.credit;
-
-                        // Group by month for chart
-                        const date = new Date(entry.transaction_date);
-                        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                        const monthName = date.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
-                        
-                        if (!monthlyTransactionData[monthKey]) {
-                            monthlyTransactionData[monthKey] = { 
-                                month: monthName, 
-                                debit: 0, 
-                                credit: 0 
-                            };
-                        }
-                        monthlyTransactionData[monthKey].debit += journalEntry.debit;
-                        monthlyTransactionData[monthKey].credit += journalEntry.credit;
+                        dailyTransactionData[dateKey].debit += journalEntry.debit;
+                        dailyTransactionData[dateKey].credit += journalEntry.credit;
                     });
                 });
 
+                console.log('Daily transaction data before balance calculation:', dailyTransactionData);
+
+                // Calculate balance for each day
+                const chartDataWithBalance = Object.values(dailyTransactionData)
+                    .sort((a: any, b: any) => new Date(a.fullDate).getTime() - new Date(b.fullDate).getTime())
+                    .map((item: any) => {
+                        // Calculate the balance for this specific day
+                        const dailyBalance = item.debit - item.credit;
+                        console.log(`Date: ${item.date}, Debit: ${item.debit}, Credit: ${item.credit}, Daily Balance: ${dailyBalance}`);
+                        return {
+                            ...item,
+                            balance: dailyBalance,
+                            dailyNet: dailyBalance
+                        };
+                    });
+
+                console.log('Chart data:', chartDataWithBalance);
+                
+                // If no daily data, create a single point with total balance
+                if (chartDataWithBalance.length === 0 && (debitTotal > 0 || creditTotal > 0)) {
+                    const totalBalance = debitTotal - creditTotal;
+                    const today = new Date();
+                    const todayLabel = today.toLocaleDateString('id-ID', { 
+                        day: 'numeric', 
+                        month: 'short' 
+                    });
+                    
+                    setChartData([{
+                        date: todayLabel,
+                        fullDate: today.toISOString().split('T')[0],
+                        debit: debitTotal,
+                        credit: creditTotal,
+                        balance: totalBalance,
+                        dailyNet: totalBalance
+                    }]);
+                } else {
+                    setChartData(chartDataWithBalance);
+                }
+                
                 setTotalDebit(debitTotal);
                 setTotalCredit(creditTotal);
-                setChartData(Object.values(monthlyTransactionData).sort((a: any, b: any) => {
-                    const dateA = new Date(a.month);
-                    const dateB = new Date(b.month);
-                    return dateA.getTime() - dateB.getTime();
-                }));
+            } else {
+                console.log('No journal data found or unexpected structure');
+                // Set empty data for chart
+                setChartData([]);
+                setTotalDebit(0);
+                setTotalCredit(0);
             }
 
         } catch (error) {
@@ -142,8 +201,10 @@ function Page() {
         fetchData();
     }, []);
 
-    console.log(cart);
-    console.log(monthlyData);
+    console.log('Cart data:', cart);
+    console.log('Monthly data:', monthlyData);
+    console.log('Chart data:', chartData);
+    console.log('Journal data:', journalData);
 
     return (
         <DefaultLayout>
@@ -175,64 +236,98 @@ function Page() {
 
 
 
-                    <div className="p-4 rounded-xl shadow-lg w-full h-[300px] mt-10">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={cart}>
-                                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#eee" />
-                                <XAxis dataKey="date" stroke="#666" />
-                                <YAxis hide />
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: '#222', border: 'none' }}
-                                    labelStyle={{ color: '#fff' }}
-                                    cursor={{ stroke: '#8884d8', strokeWidth: 1 }}
-                                    formatter={(value: any) =>
-                                        new Intl.NumberFormat('id-ID', {
-                                            style: 'currency',
-                                            currency: 'IDR',
-                                            minimumFractionDigits: 0,
-                                        }).format(value)
-                                    }
-                                />
+                    <div className="p-2 sm:p-4 rounded-xl shadow-lg w-full h-[250px] sm:h-[300px] mt-10">
+                        <h3 className="text-sm sm:text-lg font-semibold text-gray-700 mb-2 sm:mb-4">Saldo Transaksi Harian</h3>
+                        {chartData && chartData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={chartData}>
+                                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#eee" />
+                                    <XAxis 
+                                        dataKey="date" 
+                                        stroke="#666" 
+                                        fontSize={12}
+                                        tick={{ fontSize: 12 }}
+                                    />
+                                    <YAxis 
+                                        stroke="#666"
+                                        fontSize={12}
+                                        tick={{ fontSize: 12 }}
+                                        tickFormatter={(value) => 
+                                            new Intl.NumberFormat('id-ID', {
+                                                style: 'currency',
+                                                currency: 'IDR',
+                                                minimumFractionDigits: 0,
+                                                maximumFractionDigits: 0,
+                                            }).format(value).replace('Rp', '')
+                                        }
+                                    />
+                                    <Tooltip
+                                        contentStyle={{ 
+                                            backgroundColor: '#222', 
+                                            border: 'none',
+                                            fontSize: '12px',
+                                            padding: '8px'
+                                        }}
+                                        labelStyle={{ 
+                                            color: '#fff',
+                                            fontSize: '12px'
+                                        }}
+                                        cursor={{ stroke: '#8884d8', strokeWidth: 1 }}
+                                        formatter={(value: any, name: string) => {
+                                            // Only show debit and credit in tooltip
+                                            if (name === 'debit' || name === 'credit') {
+                                                return [
+                                                    new Intl.NumberFormat('id-ID', {
+                                                        style: 'currency',
+                                                        currency: 'IDR',
+                                                        minimumFractionDigits: 0,
+                                                    }).format(value),
+                                                    name === 'debit' ? 'Debit' : 'Credit'
+                                                ];
+                                            }
+                                            return null;
+                                        }}
+                                        labelFormatter={(label, payload) => {
+                                            if (payload && payload.length > 0) {
+                                                const data = payload[0].payload;
+                                                return `${label}`;
+                                            }
+                                            return label;
+                                        }}
+                                    />
 
-                                {/* Area Hijau */}
-                                <Area
-                                    type="monotone"
-                                    dataKey="income"
-                                    stroke="#22c55e"
-                                    strokeWidth={3}
-                                    fill="url(#colorIncome)"
-                                    dot={{ r: 0 }}
-                                    activeDot={{ r: 4 }}
-                                    name="Pemasukan"
-                                />
+                                    {/* Line untuk Debit */}
+                                    <Line
+                                        type="monotone"
+                                        dataKey="debit"
+                                        stroke="#3b82f6"
+                                        strokeWidth={2}
+                                        dot={{ r: 3 }}
+                                        activeDot={{ r: 5 }}
+                                        name="Debit"
+                                    />
 
-                                {/* Area Biru */}
-                                <Area
-                                    type="monotone"
-                                    dataKey="expense"
-                                    stroke="#FB4141"
-                                    strokeWidth={3}
-                                    fill="url(#colorExpense)"
-                                    dot={{ r: 0 }}
-                                    activeDot={{ r: 4 }}
-                                    name="Pengeluaran"
-                                />
-
-                                {/* Gradient Fill */}
-                                <defs>
-                                    <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#22c55e" stopOpacity={0.3} />
-                                        <stop offset="100%" stopColor="#22c55e" stopOpacity={0} />
-                                    </linearGradient>
-                                    <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#FB4141" stopOpacity={0.3} />
-                                        <stop offset="100%" stopColor="#FB4141" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                            </AreaChart>
-                        </ResponsiveContainer>
-
-
+                                    {/* Line untuk Credit */}
+                                    <Line
+                                        type="monotone"
+                                        dataKey="credit"
+                                        stroke="#ef4444"
+                                        strokeWidth={2}
+                                        dot={{ r: 3 }}
+                                        activeDot={{ r: 5 }}
+                                        name="Credit"
+                                    />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="flex items-center justify-center h-full">
+                                <div className="text-center">
+                                    <div className="text-gray-400 text-4xl mb-2">📊</div>
+                                    <p className="text-gray-500">Belum ada data transaksi</p>
+                                    <p className="text-sm text-gray-400">Data akan muncul setelah ada transaksi yang diposting</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
